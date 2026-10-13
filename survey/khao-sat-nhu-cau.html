@@ -1,0 +1,862 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Khảo sát nhu cầu</title>
+<meta name="description" content="Phiếu khảo sát nhu cầu làm website, Zalo Mini App, CRM và hệ thống quản lý. Điền khoảng 5 phút để nhận gợi ý gói phù hợp.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gx:max(16px,env(safe-area-inset-left,0px),env(safe-area-inset-right,0px));
+  --bg:#ffffff; --surface:#ffffff; --soft:#f8fafc; --hi:#f1f5f9;
+  --ink:#0f172a; --muted:#475569; --line:#e2e8f0;
+  --btn:#0f172a; --btn-ink:#ffffff; --dot:#10b981; --warn:#b45309; --warn-bg:#fffbeb;
+  --f-body:'Inter','Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b1220; --surface:#111a2e; --soft:#0f1729; --hi:#16213a; --ink:#f1f5f9; --muted:#94a3b8; --line:#243049;
+  --btn:#f1f5f9; --btn-ink:#0b1220; --dot:#34d399; --warn:#fbbf24; --warn-bg:#2a2110; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b1220; --surface:#111a2e; --soft:#0f1729; --hi:#16213a; --ink:#f1f5f9; --muted:#94a3b8; --line:#243049;
+  --btn:#f1f5f9; --btn-ink:#0b1220; --dot:#34d399; --warn:#fbbf24; --warn-bg:#2a2110; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1rem;line-height:1.6;padding-inline:var(--gx);-webkit-font-smoothing:antialiased}
+h1,h2,h3,p,ul,ol{margin:0}
+h1,h2,h3{font-weight:700;letter-spacing:-.02em;line-height:1.3;text-wrap:balance}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--dot);outline-offset:3px;border-radius:6px}
+.wrap{max-width:760px;margin-inline:auto}
+.mono{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;background:var(--btn);color:var(--btn-ink);font-weight:600;font-size:.92rem;text-decoration:none;padding:.72rem 1.15rem;border-radius:10px;border:1px solid var(--btn);cursor:pointer;font-family:inherit}
+.btn:hover{opacity:.88}
+.btn.ghost{background:var(--surface);color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--muted);opacity:1}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+
+header.top{position:sticky;top:0;z-index:10;background:var(--bg);background:color-mix(in srgb,var(--bg) 90%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);margin-inline:calc(var(--gx)*-1);padding-inline:var(--gx);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:1rem;height:60px}
+.brand{display:flex;align-items:center;gap:.6rem;text-decoration:none;margin-right:auto;font-weight:700}
+.brand i{width:30px;height:30px;border-radius:8px;background:var(--btn);color:var(--btn-ink);display:grid;place-items:center;font-style:normal;font-size:.8rem;font-weight:800}
+.brand small{display:block;font-size:.68rem;font-weight:500;color:var(--muted);line-height:1.1}
+.brand span{line-height:1.15}
+#theme{background:none;border:1px solid var(--line);color:var(--ink);border-radius:8px;width:36px;height:36px;cursor:pointer;font-size:1rem}
+.bar{height:3px;background:var(--line);margin-inline:calc(var(--gx)*-1)}
+.bar b{display:block;height:100%;width:0;background:var(--dot);transition:width .25s}
+
+.intro{padding:2.2rem 0 1rem}
+.intro h1{font-size:clamp(1.6rem,4.5vw,2.2rem)}
+.intro p{color:var(--muted);margin-top:.6rem;max-width:60ch}
+.steps{position:relative;display:flex;gap:.35rem;flex-wrap:wrap;margin:1.2rem 0 0;padding:0;list-style:none}
+.steps li{font-size:.78rem;font-weight:600;padding:.3rem .65rem;border-radius:999px;border:1px solid var(--line);color:var(--muted);cursor:pointer}
+.steps li.on{background:var(--btn);color:var(--btn-ink);border-color:var(--btn)}
+.steps li.done{border-color:var(--dot);color:var(--ink)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:1.4rem;margin:1.2rem 0}
+.card h2{font-size:1.25rem}
+.card > p.sub{color:var(--muted);margin-top:.3rem;font-size:.95rem}
+.q{margin-top:1.5rem}
+.q > label.t,.q > .t{display:block;font-weight:600;margin-bottom:.15rem}
+.q .req{color:var(--dot)}
+.q .h{display:block;color:var(--muted);font-size:.86rem;margin-bottom:.55rem}
+.q input[type=text],.q input[type=email],.q input[type=tel],.q textarea,.q select{width:100%;font:inherit;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:.65rem .8rem}
+.q textarea{min-height:90px;resize:vertical}
+.opts{display:grid;gap:.45rem;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.opt{display:flex;gap:.6rem;align-items:flex-start;padding:.6rem .75rem;border:1px solid var(--line);border-radius:10px;background:var(--soft);cursor:pointer;font-size:.93rem;line-height:1.4}
+.opt:hover{border-color:var(--muted)}
+.opt input{margin-top:.2rem;accent-color:var(--dot);flex:none}
+.opt.on{border-color:var(--dot);background:var(--hi)}
+.opt:has(input:checked){border-color:var(--dot);background:color-mix(in srgb,var(--dot) 10%,var(--soft))}
+.opt small{display:block;color:var(--muted);font-size:.8rem}
+.err{color:#dc2626;font-size:.85rem;margin-top:.35rem;display:none}
+.q.bad .err{display:block}
+.nav{display:flex;gap:.6rem;justify-content:space-between;margin:1rem 0 2.5rem}
+
+.res h3{font-size:1.05rem;margin-top:1.4rem}
+.pk{border:1px solid var(--line);border-radius:12px;padding:1rem;margin-top:.7rem;background:var(--soft)}
+.pk .top-row{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:baseline}
+.pk b.name{font-size:1.05rem}
+.pk .wk{font-size:.88rem;color:var(--muted)}
+.pk .wk b{color:var(--ink);font-variant-numeric:tabular-nums}
+.pk .price{font-weight:700;font-variant-numeric:tabular-nums}
+.pk ul{margin:.5rem 0 0;padding-left:1.1rem;color:var(--muted);font-size:.9rem}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.6rem;margin-top:1rem}
+.kpi div{border:1px solid var(--line);border-radius:12px;padding:.8rem 1rem}
+.kpi span{display:block;font-size:.78rem;color:var(--muted);font-weight:600}
+.kpi strong{font-size:1.15rem;font-variant-numeric:tabular-nums}
+.note{font-size:.85rem;color:var(--muted);margin-top:1rem}
+.warnbox{background:var(--warn-bg);border:1px solid var(--warn);border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);color:var(--ink);border-radius:12px;padding:.8rem 1rem;margin-top:1rem;font-size:.92rem}
+.warnbox b{color:var(--warn)}
+.actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1.2rem}
+table{width:100%;border-collapse:collapse;font-size:.88rem;margin-top:.6rem}
+th,td{text-align:left;padding:.45rem .4rem;border-bottom:1px solid var(--line);vertical-align:top}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tag{display:inline-block;font-size:.75rem;font-weight:700;padding:.15rem .55rem;border-radius:999px;border:1px solid var(--line)}
+.internal{border:2px dashed var(--dot)}
+.internal ul{padding-left:1.1rem;font-size:.92rem}
+.internal li{margin-top:.25rem}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--btn);color:var(--btn-ink);padding:.6rem 1rem;border-radius:10px;font-size:.9rem;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+footer{color:var(--muted);font-size:.82rem;padding:1.5rem 0 2rem;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+/* ---------- tablet: 641 đến 1024px ---------- */
+@media (min-width:641px) and (max-width:1024px){
+  .wrap{max-width:860px}
+  .opts{grid-template-columns:1fr 1fr}
+  .card{padding:1.8rem}
+  .intro{padding-top:2.6rem}
+  .kpi{grid-template-columns:repeat(3,1fr)}
+}
+/* ---------- điện thoại: tối đa 640px ---------- */
+@media (max-width:640px){
+  .opts{grid-template-columns:1fr}
+  .intro{padding-top:1.6rem}
+  .intro p{font-size:.95rem}
+  /* thanh bước: một hàng cuộn ngang thay vì xuống 3 hàng */
+  .steps{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin-inline:calc(var(--gx)*-1);padding:2px var(--gx)}
+  .steps::-webkit-scrollbar{display:none}
+  .steps li{flex:none;white-space:nowrap;padding:.5rem .85rem}
+  /* nút Quay lại / Tiếp tục luôn nằm cuối màn hình */
+  .nav{position:-webkit-sticky;position:sticky;bottom:0;z-index:5;background:var(--bg);margin:1rem calc(var(--gx)*-1) 0;padding:.7rem var(--gx) calc(.7rem + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--bg) 94%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-top:1px solid var(--line)}
+  .nav .btn{flex:1;min-height:48px}
+  .card{padding:1.1rem;border-radius:14px}
+  .q{margin-top:1.3rem}
+  .kpi{grid-template-columns:1fr 1fr}
+  .kpi div{padding:.7rem .8rem}
+  .kpi strong{font-size:1rem}
+  .kpi div:first-child{grid-column:1/-1}
+  /* nút ở kết quả: nút đầu trải hết hàng, các nút còn lại chia đôi */
+  .actions{display:grid;grid-template-columns:1fr 1fr}
+  .actions .btn{width:100%}
+  .actions .btn:first-child{grid-column:1/-1}
+  /* bảng thành dạng xếp dọc để cột tên không bị ép */
+  table,tbody,tr,td,th{display:block;width:100%}
+  thead{display:none}
+  tr{padding:.55rem 0;border-bottom:1px solid var(--line)}
+  td,th{border:0;padding:.05rem 0}
+  td.n,th.n{text-align:left;white-space:normal;font-weight:700}
+  .pk .top-row{flex-direction:column;gap:.15rem}
+  footer{flex-direction:column;gap:.3rem;padding-bottom:calc(2rem + env(safe-area-inset-bottom,0px))}
+  .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px));max-width:calc(100vw - 32px)}
+}
+/* ---------- màn hình cảm ứng: vùng chạm tối thiểu 44px ---------- */
+@media (pointer:coarse){
+  .btn{min-height:44px}
+  #theme{width:44px;height:44px}
+  .opt{min-height:48px;align-items:center;padding:.7rem .85rem}
+  .opt input{width:20px;height:20px;margin-top:0}
+  .q input[type=text],.q input[type=email],.q input[type=tel],.q select{min-height:48px;font-size:16px}
+  .q textarea{font-size:16px}
+}
+/* ---------- điện thoại ngang (chiều cao thấp) ---------- */
+@media (max-height:480px) and (orientation:landscape){
+  header.top .wrap{height:48px}
+  .nav{position:static;border:0;padding:0;margin:1rem 0 2rem;background:none;backdrop-filter:none}
+}
+@media print{header.top,.nav,.actions,.steps,#theme,.bar{display:none!important}.card{border:none;padding:0}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="index.html"><i>PNP</i><span>Nguyễn Phan Minh Phú<small>Website · App · Hệ thống</small></span></a>
+    <button id="theme" type="button" aria-label="Đổi giao diện sáng/tối">◐</button>
+  </div>
+  <div class="bar"><b id="bar"></b></div>
+</header>
+
+<main class="wrap">
+  <section class="intro">
+    <p class="mono">Phiếu khảo sát nhu cầu</p>
+    <h1>Bạn muốn làm website, app hay hệ thống quản lý?</h1>
+    <p>Trả lời vài câu hỏi ngắn, khoảng 5 phút. Không cần biết kỹ thuật, câu nào chưa rõ cứ chọn “Chưa rõ”. Cuối phiếu bạn nhận được gợi ý gói phù hợp, rồi gửi lại cho mình để trao đổi chi tiết.</p>
+    <ol class="steps" id="steps"></ol>
+    <p class="note" id="privacy" hidden>Câu trả lời được lưu lại để Minh Phú liên hệ tư vấn cho bạn, không chia sẻ cho bên thứ ba. Muốn xóa, nhắn Zalo 0379 774 886.</p>
+  </section>
+  <form id="form" novalidate></form>
+  <div id="result"></div>
+  <div id="imp-wrap"></div>
+</main>
+
+<footer class="wrap"><span>© 2026 Nguyễn Phan Minh Phú</span><span>npmphu97@gmail.com · Zalo 0379 774 886</span></footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+/* ============================================================
+   CẤU HÌNH GIÁ: đồng bộ với sheet "Bảng giá đề xuất" và "Vận hành"
+   trong Bao_gia_chi_tiet_Minh_Phu.xlsx. Đơn vị: VND, chưa VAT.
+   ============================================================ */
+var CONTACT = {email:'npmphu97@gmail.com', zalo:'0379774886'};
+/* Tự lưu câu trả lời khi khách điền (mỗi bước + sau khi ngừng gõ 1,5 giây).
+   - Chạy qua khao_sat_server.py trên máy bạn: tự lưu ra khao-sat-data/responses.json và .csv.
+   - Chạy trên web: dán URL Google Apps Script (xem khao-sat-apps-script.gs) vào REMOTE_ENDPOINT.
+   - Để trống REMOTE_ENDPOINT: trên web trang không gửi dữ liệu đi đâu. */
+var REMOTE_ENDPOINT = '';
+var ENDPOINT = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? '/api/khao-sat' : REMOTE_ENDPOINT;
+var SHOW_PRICE = false; // false: khách chỉ thấy tên gói, không thấy giá
+
+var PRICE = {
+  web:[ // 4 cấp website: giá, số tuần (sheet Gói cấp độ)
+    {key:'re',     name:'Website gói Rẻ (Landing page)', price:5000000,  weeks:1, inc:['Landing page 1 trang, hiển thị tốt trên điện thoại','Form liên hệ gửi về email','Tối ưu tốc độ, SEO cơ bản','Tên miền riêng, HTTPS']},
+    {key:'coban',  name:'Website gói Cơ bản',           price:12000000, weeks:2, inc:['Website giới thiệu khoảng 5 trang','Giới thiệu sản phẩm/dịch vụ theo chuyên mục','Form liên hệ, Google Analytics/Pixel','Tối ưu tốc độ và SEO kỹ thuật']},
+    {key:'nangcao',name:'Website gói Nâng cao (có CMS)',price:28000000, weeks:4, wmax:6, inc:['Thiết kế riêng theo thương hiệu','Tự đăng bài, sửa trang, quản lý banner/menu (CMS)','Thư viện ảnh/video, SEO từng trang','Trang quản trị, phân quyền người dùng']},
+    {key:'caocap', name:'Website gói Cao cấp',          price:45000000, weeks:5, wmax:7, inc:['UI/UX riêng, tốc độ cao','Đa ngôn ngữ Việt/Anh','Thanh toán trực tuyến (VNPay, MoMo, QR), email tự động','Đăng nhập Google/Microsoft, chức năng theo yêu cầu riêng']}
+  ],
+  mini:{
+    basic:{name:'Zalo Mini App cơ bản', price:30000000, weeks:4, inc:['Giới thiệu, đặt lịch hoặc điểm danh','Lưu dữ liệu, đồng bộ Excel/OneDrive','Chạy ngay trong Zalo, không cần cài app']},
+    adv:  {name:'Zalo Mini App nâng cao',price:70000000, weeks:8, inc:['Bán hàng, giỏ hàng, thanh toán','Tích điểm, thẻ thành viên','Gửi thông báo ZNS, trang quản trị']}
+  },
+  crm:{name:'CRM tùy chỉnh gọn', price:85000000, weeks:8, inc:['Quản lý khách hàng, pipeline kanban','Nhắc việc, báo giá/hợp đồng xuất PDF','Dashboard doanh số, nhập/xuất Excel']},
+  ql: {name:'Hệ thống quản lý vận hành', price:160000000, weeks:12, inc:['Các nghiệp vụ nội bộ theo yêu cầu (nhân sự, lịch, học viên, thu chi...)','Phân quyền theo vai trò, dashboard báo cáo','Nhập/xuất Excel, email thông báo tự động']},
+  addon:{ // sheet Bảng giá đề xuất, mục C (một số mục đánh dấu ước tính)
+    popup:{name:'Popup thông báo',price:500000},
+    ggdich:{name:'Google Dịch (đa ngôn ngữ nhanh)',price:500000},
+    dangonngu:{name:'Đa ngôn ngữ Việt/Anh đầy đủ',price:4000000},
+    tintuc:{name:'Đẩy tin tức mới',price:1500000},
+    leadform:{name:'Popup form thu thông tin khách',price:1500000},
+    chat:{name:'Chat Zalo OA / live chat',price:3000000},
+    tichhopcrm:{name:'Đẩy khách hàng tiềm năng vào CRM đang dùng',price:6000000},
+    thanhtoan:{name:'Cổng thanh toán (VNPay, MoMo, QR)',price:8000000},
+    giohang:{name:'Giỏ hàng và bán hàng cơ bản',price:15000000},
+    excel:{name:'Nhập, xuất Excel',price:3000000},
+    crmmodule:{name:'Module CRM gộp vào hệ thống quản lý',price:25000000,est:true},
+    ketoan:{name:'Tích hợp phần mềm kế toán',price:10000000,est:true},
+    hoadon:{name:'Tích hợp hóa đơn điện tử',price:8000000,est:true},
+    nganhang:{name:'Đối soát ngân hàng / VietQR',price:10000000,est:true},
+    zns:{name:'Gửi tin Zalo ZNS',price:6000000,est:true}
+  },
+  ops:{ // sheet Vận hành
+    coban:{name:'Vận hành Cơ bản',fee:538333,sla:'Phản hồi trong 2 ngày làm việc'},
+    tieuchuan:{name:'Vận hành Tiêu chuẩn',fee:2653333,sla:'Phản hồi trong 1 ngày làm việc'},
+    nangcao:{name:'Vận hành Nâng cao',fee:5563333,sla:'Phản hồi trong 4 giờ làm việc, trực ngoài giờ'}
+  },
+  vat:0.1
+};
+
+/* ============================================================
+   BỘ CÂU HỎI
+   type: text | email | tel | textarea | radio | check
+   show(a): điều kiện hiển thị theo câu trả lời trước
+   ============================================================ */
+function has(a,k,v){return Array.isArray(a[k])&&a[k].indexOf(v)>=0}
+function wantsWeb(a){return ['landing','web','cms','shop'].some(function(v){return has(a,'muc_tieu',v)})}
+function wantsSys(a){return has(a,'muc_tieu','crm')||has(a,'muc_tieu','ql')}
+function wantsMini(a){return has(a,'muc_tieu','mini')}
+
+/* ============================================================
+   TÙY CHỈNH THEO LĨNH VỰC KINH DOANH
+   - goals: nhãn của 8 mục tiêu (null = ẩn). Mã mục tiêu giữ nguyên để logic giá không đổi.
+   - nv: danh sách nghiệp vụ [mã, nhãn]. Mã không thuộc CRM (khach_hang, pipeline,
+     bao_gia, nhac_viec, bao_cao) sẽ được tính là hệ thống quản lý vận hành.
+   - pop: các mục thường gặp ở lĩnh vực này (hiện nhãn "Thường gặp").
+   ============================================================ */
+function ext(a,b){var o={},k;for(k in a)o[k]=a[k];for(k in b)o[k]=b[k];return o}
+var GOAL_ORDER=['landing','web','cms','shop','mini','crm','ql','unknown'];
+var SEC_DEFAULT={
+  name:'chung',
+  goals:{
+    landing:'Một trang giới thiệu để chạy quảng cáo, thu số điện thoại khách',
+    web:'Website giới thiệu công ty, sản phẩm, dịch vụ chuyên nghiệp',
+    cms:'Website tự đăng tin tức, bài viết, làm SEO lên Google lâu dài',
+    shop:'Bán hàng online: khách đặt hàng, thanh toán trên web',
+    mini:'Ứng dụng trên Zalo (Mini App): đặt lịch, tích điểm, mua hàng',
+    crm:'Quản lý khách hàng, theo dõi cơ hội bán hàng, báo giá',
+    ql:'Quản lý vận hành nội bộ: nhân sự, lịch, kho, thu chi...',
+    unknown:'Chưa rõ, cần được tư vấn'},
+  pop:[],
+  vd:'Ví dụ: “Khách hỏi qua Zalo nhiều quá, muốn có chỗ để khách tự đặt lịch” hoặc “Đang quản lý bằng Excel, hay sai sót”.',
+  nvEx:'Ví dụ: quản lý hợp đồng, bảo hành, công văn...',
+  nv:[['khach_hang','Khách hàng, lịch sử liên hệ'],['pipeline','Cơ hội bán hàng theo giai đoạn'],['bao_gia','Báo giá, hợp đồng'],['nhac_viec','Nhắc việc, chăm sóc khách'],
+      ['nhan_su','Nhân sự, hồ sơ nhân viên'],['lich','Lịch làm việc, ca, phân công'],['diem_danh','Chấm công / điểm danh'],['thu_chi','Thu chi, công nợ'],
+      ['kho','Kho, sản phẩm'],['don_hang','Đơn hàng'],['bao_cao','Báo cáo, dashboard']]
+};
+var SECTORS={
+ giao_duc:{name:'giáo dục',
+  goals:{landing:'Trang đăng ký học thử / tuyển sinh để chạy quảng cáo, thu số điện thoại phụ huynh',
+    web:'Website giới thiệu trung tâm: khóa học, giáo viên, học phí, cơ sở',
+    cms:'Website đăng tin tuyển sinh, lịch khai giảng, thành tích học viên, lên Google',
+    shop:'Bán khóa học online: đăng ký và đóng học phí ngay trên web',
+    mini:'Mini App trên Zalo cho phụ huynh/học viên: đăng ký học thử, xem lịch, điểm danh',
+    crm:'Quản lý học viên tiềm năng, theo dõi tư vấn tuyển sinh, báo giá học phí',
+    ql:'Quản lý lớp học, học viên, giáo viên, điểm danh, học phí'},
+  pop:['web','mini','ql'],
+  vd:'Ví dụ: “Đang quản lý học viên bằng Excel, hay sai sót học phí” hoặc “Muốn phụ huynh tự đăng ký học thử qua Zalo”.',
+  nvEx:'Ví dụ: thi xếp lớp, cấp chứng chỉ, học bù, xe đưa đón...',
+  nv:[['khach_hang','Học viên tiềm năng, lịch sử tư vấn'],['pipeline','Tiến trình tuyển sinh: tư vấn, học thử, đăng ký'],['bao_gia','Báo giá học phí, hợp đồng đăng ký'],['nhac_viec','Nhắc lịch gọi tư vấn, nhắc đóng học phí'],
+      ['hoc_vien','Hồ sơ học viên, lớp học'],['lich','Thời khóa biểu, phòng học, lịch dạy'],['diem_danh','Điểm danh học viên và giáo viên'],['diem_so','Điểm, nhận xét, thông báo kết quả cho phụ huynh'],
+      ['nhan_su','Giáo viên, nhân viên, lương theo giờ dạy'],['thu_chi','Học phí, công nợ, thu chi'],['kho','Giáo trình, tài liệu, thiết bị'],['bao_cao','Báo cáo doanh thu, sĩ số, tỷ lệ chuyển đổi']]},
+ ban_le:{name:'bán lẻ, thương mại',
+  goals:{landing:'Trang giới thiệu sản phẩm/khuyến mãi để chạy quảng cáo, thu số điện thoại khách',
+    web:'Website giới thiệu cửa hàng, danh mục sản phẩm, địa chỉ chi nhánh',
+    cms:'Website đăng tin khuyến mãi, bài viết, làm SEO để khách tìm thấy trên Google',
+    shop:'Bán hàng online: giỏ hàng, đặt hàng, thanh toán',
+    mini:'Mini App trên Zalo: đặt hàng, tích điểm, thẻ thành viên, voucher',
+    crm:'Quản lý khách hàng, lịch sử mua, chăm sóc khách quen',
+    ql:'Quản lý kho, đơn hàng, nhập xuất, công nợ, nhân viên'},
+  pop:['shop','mini','ql'],
+  vd:'Ví dụ: “Hàng tồn kho hay lệch sổ sách” hoặc “Muốn khách tích điểm và đặt hàng ngay trên Zalo”.',
+  nvEx:'Ví dụ: trả hàng, bảo hành, quản lý nhiều cửa hàng...',
+  nv:[['khach_hang','Khách hàng, lịch sử mua hàng'],['bao_gia','Báo giá khách sỉ, hợp đồng'],['nhac_viec','Nhắc chăm sóc khách, nhắc nợ'],
+      ['don_hang','Đơn hàng online và tại quầy'],['kho','Kho, tồn kho, nhập xuất'],['ncc','Nhà cung cấp, đơn nhập hàng'],['khuyen_mai','Khuyến mãi, voucher, tích điểm'],
+      ['thu_chi','Thu chi, công nợ'],['nhan_su','Nhân viên, ca làm'],['diem_danh','Chấm công'],['bao_cao','Báo cáo doanh thu, hàng bán chạy']]},
+ dich_vu:{name:'dịch vụ (spa, phòng khám, nhà hàng, salon)',
+  goals:{landing:'Trang giới thiệu dịch vụ/ưu đãi để chạy quảng cáo, thu số điện thoại, nhận đặt lịch',
+    web:'Website giới thiệu dịch vụ, bảng giá, hình ảnh cơ sở, địa chỉ',
+    cms:'Website đăng bài chăm sóc, tin ưu đãi, làm SEO lên Google',
+    shop:'Bán sản phẩm, gói dịch vụ, thẻ trả trước online',
+    mini:'Mini App trên Zalo: đặt lịch hẹn, thẻ thành viên, tích điểm, nhắc lịch',
+    crm:'Quản lý khách hàng, lịch sử sử dụng dịch vụ, chăm sóc sau dịch vụ',
+    ql:'Quản lý lịch hẹn, nhân viên, liệu trình, thu chi'},
+  pop:['landing','mini','ql'],
+  vd:'Ví dụ: “Khách đặt lịch qua Zalo và Facebook lẫn lộn, hay bị trùng giờ” hoặc “Muốn quản lý thẻ liệu trình của khách”.',
+  nvEx:'Ví dụ: hồ sơ bệnh án, đơn thuốc, tính hoa hồng tour, đặt bàn...',
+  nv:[['khach_hang','Hồ sơ khách, lịch sử sử dụng dịch vụ'],['lich','Lịch hẹn, phân ca nhân viên, phòng/giường'],['lieu_trinh','Liệu trình, thẻ trả trước, số buổi còn lại'],['nhac_viec','Nhắc lịch hẹn, chăm sóc sau dịch vụ'],
+      ['khuyen_mai','Khuyến mãi, voucher, tích điểm'],['nhan_su','Nhân viên, hoa hồng'],['diem_danh','Chấm công'],['thu_chi','Thu chi, thanh toán, công nợ'],['kho','Kho vật tư, sản phẩm'],['bao_cao','Báo cáo doanh thu, khách quay lại']]},
+ tu_van:{name:'luật, kế toán, tư vấn',
+  goals:{landing:'Trang giới thiệu dịch vụ để chạy quảng cáo, thu thông tin khách cần tư vấn',
+    web:'Website giới thiệu công ty, lĩnh vực hành nghề, đội ngũ chuyên gia, uy tín',
+    cms:'Website đăng bài chuyên môn, tin pháp lý/thuế, làm SEO tạo uy tín',
+    shop:'Bán gói tư vấn, tài liệu, khóa học online',
+    mini:'Mini App trên Zalo: đặt lịch hẹn tư vấn, tra cứu tiến độ hồ sơ',
+    crm:'Quản lý khách hàng, theo dõi cơ hội, báo giá phí dịch vụ',
+    ql:'Quản lý vụ việc/hồ sơ, tiến độ, deadline, tính giờ làm, thu phí'},
+  pop:['cms','crm','ql'],
+  vd:'Ví dụ: “Hồ sơ vụ việc nằm rải rác, hay quên hạn nộp” hoặc “Muốn website để khách tìm thấy và tin tưởng hơn”.',
+  nvEx:'Ví dụ: ủy quyền, lưu hồ sơ theo thời hạn, tính phí theo giờ...',
+  nv:[['khach_hang','Khách hàng, hồ sơ liên hệ'],['pipeline','Cơ hội tư vấn đang theo dõi'],['bao_gia','Báo giá phí, hợp đồng dịch vụ xuất PDF'],['nhac_viec','Nhắc hạn nộp, deadline, lịch hẹn'],
+      ['vu_viec','Hồ sơ/vụ việc và tiến độ xử lý'],['tai_lieu','Lưu trữ tài liệu, phân quyền xem'],['gio_cong','Chấm giờ làm việc theo vụ việc'],['thu_chi','Phí dịch vụ, tạm ứng, công nợ'],
+      ['nhan_su','Nhân sự, phân công'],['lich','Lịch hẹn, lịch họp'],['bao_cao','Báo cáo doanh thu, khối lượng việc']]},
+ san_xuat:{name:'sản xuất, phân phối',
+  goals:{landing:'Trang giới thiệu sản phẩm/năng lực để chạy quảng cáo, nhận yêu cầu báo giá',
+    web:'Website giới thiệu nhà máy, sản phẩm, năng lực sản xuất, chứng nhận',
+    cms:'Website đăng tin, catalogue, làm SEO để đối tác tìm thấy trên Google',
+    shop:'Cổng đặt hàng online cho đại lý, khách sỉ',
+    mini:'Mini App trên Zalo cho đại lý: tra cứu sản phẩm, đặt hàng nhanh',
+    crm:'Quản lý khách hàng, đại lý, báo giá, theo dõi đơn lớn',
+    ql:'Quản lý đơn hàng, kho, sản xuất, giao hàng, công nợ đại lý'},
+  pop:['web','crm','ql'],
+  vd:'Ví dụ: “Đơn hàng đại lý ghi sổ tay, hay nhầm tồn kho” hoặc “Muốn có catalogue online cho đối tác nước ngoài”.',
+  nvEx:'Ví dụ: truy xuất lô hàng, bảo trì máy, kiểm tra chất lượng...',
+  nv:[['khach_hang','Khách hàng, đại lý'],['pipeline','Cơ hội đơn hàng lớn'],['bao_gia','Báo giá, hợp đồng'],['nhac_viec','Nhắc chăm sóc đại lý, nhắc nợ'],
+      ['don_hang','Đơn hàng, giao hàng'],['kho','Kho nguyên vật liệu, thành phẩm'],['san_xuat','Lệnh sản xuất, tiến độ'],['ncc','Nhà cung cấp, đơn nhập'],
+      ['thu_chi','Công nợ đại lý, thu chi'],['nhan_su','Nhân sự, ca làm'],['diem_danh','Chấm công'],['bao_cao','Báo cáo sản lượng, doanh thu']]},
+ bds:{name:'bất động sản, xây dựng',
+  goals:{landing:'Trang giới thiệu dự án để chạy quảng cáo, thu thông tin khách quan tâm',
+    web:'Website giới thiệu công ty, dự án, công trình đã thực hiện',
+    cms:'Website đăng tin dự án, bài viết thị trường, làm SEO',
+    shop:null,
+    mini:'Mini App trên Zalo: xem dự án, đặt lịch xem nhà, nhận tư vấn',
+    crm:'Quản lý khách mua, nhu cầu, lịch xem nhà, theo dõi cơ hội',
+    ql:'Quản lý giỏ hàng dự án, hợp đồng, tiến độ công trình, thu chi'},
+  pop:['landing','crm','ql'],
+  vd:'Ví dụ: “Môi giới ghi khách ra Excel riêng, mất khách khi nhân viên nghỉ” hoặc “Cần trang giới thiệu dự án để chạy quảng cáo”.',
+  nvEx:'Ví dụ: pháp lý dự án, nghiệm thu, bảo hành công trình...',
+  nv:[['khach_hang','Khách hàng, nhu cầu, lịch sử liên hệ'],['pipeline','Tiến trình khách: quan tâm, xem nhà, đặt cọc, ký'],['bao_gia','Báo giá, hợp đồng'],['nhac_viec','Nhắc lịch xem nhà, nhắc thanh toán theo đợt'],
+      ['san_pham','Giỏ hàng: căn/lô/sản phẩm và trạng thái'],['du_an','Tiến độ công trình, hạng mục'],['thu_chi','Thu theo đợt, công nợ, chi phí công trình'],['kho','Vật tư, thiết bị'],
+      ['nhan_su','Nhân viên, môi giới, hoa hồng'],['lich','Lịch làm việc, lịch xem nhà'],['bao_cao','Báo cáo bán hàng, tiến độ']]}
+};
+function sec(a){var k=SECTORS[a.linh_vuc];return k?ext(SEC_DEFAULT,k):SEC_DEFAULT}
+function goalOpts(a){var S=sec(a),g=ext(SEC_DEFAULT.goals,S.goals);
+  return GOAL_ORDER.filter(function(k){return g[k]!==null}).map(function(k){return S.pop.indexOf(k)>=0?[k,g[k],'Thường gặp ở lĩnh vực này']:[k,g[k]]})}
+function nvOpts(a){return sec(a).nv}
+function res(x){return typeof x==='function'?x(ans):x}
+function getOpts(q,a){return typeof q.opts==='function'?q.opts(a||ans):q.opts}
+function secNote(a){return a.linh_vuc&&SECTORS[a.linh_vuc]?' Các lựa chọn đã được điều chỉnh theo lĩnh vực '+SECTORS[a.linh_vuc].name+'.':''}
+
+var STEPS = [
+ {id:'s1',title:'Thông tin',desc:'Để mình biết liên hệ với ai và hiểu bối cảnh doanh nghiệp.',qs:[
+  {id:'ho_ten',type:'text',label:'Họ và tên',req:true},
+  {id:'cong_ty',type:'text',label:'Tên doanh nghiệp / thương hiệu',req:true},
+  {id:'sdt',type:'tel',label:'Số điện thoại / Zalo',req:true},
+  {id:'email',type:'email',label:'Email'},
+  {id:'vai_tro',type:'radio',label:'Vai trò của bạn trong dự án',req:true,opts:[
+    ['chu','Chủ doanh nghiệp / người quyết định'],['quanly','Quản lý được giao phụ trách'],['tim_hieu','Nhân viên, đang tìm hiểu giúp']]},
+  {id:'linh_vuc',type:'radio',label:'Lĩnh vực kinh doanh',req:true,opts:[
+    ['giao_duc','Giáo dục, trung tâm đào tạo'],['ban_le','Bán lẻ, thương mại, cửa hàng'],['dich_vu','Dịch vụ: spa, phòng khám, nhà hàng, salon'],
+    ['tu_van','Luật, kế toán, tư vấn'],['san_xuat','Sản xuất, phân phối'],['bds','Bất động sản, xây dựng'],['khac','Khác']]},
+  {id:'quy_mo',type:'radio',label:'Quy mô nhân sự',opts:[['1-5','1 đến 5 người'],['6-20','6 đến 20 người'],['21-50','21 đến 50 người'],['50+','Trên 50 người']]}
+ ]},
+ {id:'s2',title:'Mục tiêu',desc:'Phần quan trọng nhất: bạn muốn giải quyết việc gì.',qs:[
+  {id:'muc_tieu',type:'check',label:'Bạn cần làm gì? (chọn tất cả việc phù hợp)',req:true,opts:goalOpts,h:function(a){return 'Chọn tất cả việc phù hợp.'+secNote(a)}},
+  {id:'van_de',type:'textarea',label:'Mô tả ngắn vấn đề bạn đang gặp hoặc kết quả bạn mong muốn',h:function(a){return sec(a).vd}},
+  {id:'hien_co',type:'check',label:'Hiện tại bạn đã có những gì?',opts:[
+    ['chua_co','Chưa có gì'],['web_cu','Website cũ (muốn làm lại)'],['ten_mien','Tên miền'],['fanpage','Fanpage Facebook / TikTok'],
+    ['zalo_oa','Zalo OA (trang Zalo doanh nghiệp)'],['excel','Đang quản lý bằng Excel / Google Sheet'],['phan_mem','Đang dùng một phần mềm khác']]},
+  {id:'phan_mem_ten',type:'text',label:'Phần mềm đang dùng là gì? Điều gì chưa hài lòng?',show:function(a){return has(a,'hien_co','phan_mem')||has(a,'hien_co','web_cu')}},
+  {id:'nguoi_dung',type:'radio',label:'Ai là người dùng chính?',req:true,opts:[
+    ['khach','Khách hàng bên ngoài'],['noi_bo','Nhân viên nội bộ'],['ca_hai','Cả hai']]},
+  {id:'kenh',type:'check',label:'Khách hàng thường tìm đến bạn qua đâu?',opts:[
+    ['google','Tìm trên Google'],['ads','Quảng cáo Facebook / TikTok'],['zalo','Zalo'],['gioi_thieu','Người quen giới thiệu'],['truc_tiep','Đến trực tiếp cửa hàng']]}
+ ]},
+ {id:'s3',title:'Website',desc:'Giúp xác định quy mô và cấp độ website.',show:wantsWeb,qs:[
+  {id:'so_trang',type:'radio',label:'Website cần khoảng bao nhiêu trang?',req:true,h:'Mỗi trang là một mục trên menu, ví dụ: Trang chủ, Giới thiệu, Dịch vụ, Tin tức, Liên hệ.',opts:[
+    ['1','1 trang duy nhất (landing page)'],['2-5','2 đến 5 trang'],['6-15','6 đến 15 trang'],['15+','Trên 15 trang'],['chua_ro','Chưa rõ']]},
+  {id:'cap_nhat',type:'radio',label:'Bạn sẽ thay đổi nội dung website thường xuyên cỡ nào?',req:true,opts:[
+    ['hiem','Hầu như không, làm xong để đó'],['nam','Vài lần một năm'],['thang','Hằng tháng (đăng tin, khuyến mãi)'],['tuan','Hằng tuần trở lên']]},
+  {id:'ai_cap_nhat',type:'radio',label:'Ai sẽ cập nhật nội dung?',opts:[
+    ['tu_lam','Tôi / nhân viên tự làm'],['nho','Nhờ bên làm web cập nhật giúp']]},
+  {id:'giao_dien',type:'radio',label:'Bạn muốn giao diện như thế nào?',req:true,opts:[
+    ['mau','Dùng mẫu đẹp có sẵn, chỉnh theo màu và logo'],['rieng','Thiết kế riêng hoàn toàn, khác biệt'],['chua_ro','Chưa rõ']]},
+  {id:'nhan_dien',type:'radio',label:'Bạn đã có logo, màu sắc thương hiệu chưa?',opts:[
+    ['co','Đã có đầy đủ'],['logo','Có logo, chưa có bộ nhận diện'],['chua','Chưa có, cần thiết kế']]},
+  {id:'noi_dung',type:'radio',label:'Nội dung (chữ, hình ảnh) đã sẵn sàng chưa?',opts:[
+    ['du','Có đủ'],['mot_phan','Có một phần'],['chua','Chưa có, cần hỗ trợ viết nội dung']]},
+  {id:'ngon_ngu',type:'radio',label:'Website cần những ngôn ngữ nào?',opts:[
+    ['vi','Chỉ tiếng Việt'],['gg','Có nút dịch tự động (Google Dịch) là đủ'],['vi_en','Việt và Anh, nội dung viết riêng từng ngôn ngữ']]},
+  {id:'chuc_nang',type:'check',label:'Website cần thêm chức năng nào?',h:'Chọn những gì bạn thật sự cần ngay. Có thể bổ sung sau.',opts:[
+    ['form','Form liên hệ gửi về email'],['leadform','Popup thu thông tin khách hàng'],['popup','Popup thông báo, khuyến mãi'],
+    ['chat','Nút chat Zalo / Messenger'],['tintuc','Tin tức, bài viết'],['thu_vien','Thư viện ảnh, video'],
+    ['gio_hang','Giỏ hàng, đặt hàng'],['thanh_toan','Thanh toán online (VNPay, MoMo, QR)'],['dat_lich','Khách đặt lịch hẹn'],
+    ['dang_nhap','Khách đăng nhập tài khoản thành viên'],['email_tu_dong','Email tự động (xác nhận đơn, lịch hẹn)'],
+    ['day_crm','Đẩy khách hàng vào phần mềm CRM đang dùng'],['analytics','Đo lượt truy cập (Google Analytics, Pixel)']]},
+  {id:'so_san_pham',type:'radio',label:'Số lượng sản phẩm dự kiến bán online',show:function(a){return has(a,'muc_tieu','shop')||has(a,'chuc_nang','gio_hang')},opts:[
+    ['<50','Dưới 50'],['50-500','50 đến 500'],['500+','Trên 500'],['chua_ro','Chưa rõ']]},
+  {id:'tham_khao',type:'textarea',label:'Website bạn thích để tham khảo (dán link, ghi điểm bạn thích)'}
+ ]},
+ {id:'s4',title:'Hệ thống',desc:'Giúp ước lượng quy mô CRM / hệ thống quản lý.',show:wantsSys,qs:[
+  {id:'so_user',type:'radio',label:'Bao nhiêu người sẽ dùng hệ thống?',req:true,opts:[
+    ['1-5','1 đến 5 người'],['6-20','6 đến 20 người'],['21-50','21 đến 50 người'],['50+','Trên 50 người']]},
+  {id:'nghiep_vu',type:'check',label:'Cần quản lý những việc gì?',req:true,opts:nvOpts,h:function(a){return 'Chọn tất cả nghiệp vụ cần đưa vào hệ thống.'+secNote(a)}},
+  {id:'nghiep_vu_khac',type:'text',label:'Nghiệp vụ khác (nếu có)',h:function(a){return sec(a).nvEx}},
+  {id:'chi_nhanh',type:'radio',label:'Doanh nghiệp có mấy chi nhánh / cơ sở?',opts:[['1','1 cơ sở'],['2-3','2 đến 3'],['4+','4 trở lên']]},
+  {id:'phan_quyen',type:'radio',label:'Phân quyền người dùng',opts:[
+    ['don_gian','Đơn giản: quản trị và nhân viên'],['vai_tro','Vài vai trò khác nhau (sale, kế toán, quản lý...)'],['phuc_tap','Phức tạp: theo chi nhánh, phòng ban, duyệt nhiều cấp']]},
+  {id:'du_lieu',type:'radio',label:'Có dữ liệu cũ cần chuyển vào hệ thống không?',opts:[
+    ['khong','Không, làm mới từ đầu'],['it','Có, vài file Excel'],['nhieu','Nhiều dữ liệu, từ nhiều nguồn']]},
+  {id:'tich_hop',type:'check',label:'Cần kết nối với hệ thống nào?',opts:[
+    ['ketoan','Phần mềm kế toán (MISA, Fast...)'],['hoadon','Hóa đơn điện tử'],['nganhang','Ngân hàng / VietQR để đối soát'],['zns','Gửi tin Zalo ZNS cho khách'],['khong','Không cần'],['chua_ro','Chưa rõ']]},
+  {id:'nen_tang',type:'radio',label:'Nhân viên dùng trên thiết bị nào?',opts:[
+    ['may_tinh','Chủ yếu máy tính'],['ca_hai','Cả máy tính và điện thoại (qua trình duyệt)'],['app','Cần app riêng cài trên điện thoại']]}
+ ]},
+ {id:'s5',title:'Zalo Mini App',desc:'Giúp chọn gói Mini App phù hợp.',show:wantsMini,qs:[
+  {id:'mini_cn',type:'check',label:'Mini App cần làm được gì?',req:true,opts:[
+    ['gioi_thieu','Giới thiệu doanh nghiệp, dịch vụ'],['dat_lich','Khách đặt lịch'],['diem_danh','Điểm danh, check-in'],['ban_hang','Bán hàng, giỏ hàng'],
+    ['tich_diem','Tích điểm, thẻ thành viên'],['thanh_toan','Thanh toán trong app'],['zns','Gửi thông báo ZNS'],['dong_bo','Đồng bộ dữ liệu ra Excel']]},
+  {id:'zalo_oa',type:'radio',label:'Doanh nghiệp đã có Zalo OA đã xác thực chưa?',opts:[['co','Đã có, đã xác thực'],['chua_xt','Có nhưng chưa xác thực'],['chua','Chưa có']]},
+  {id:'mini_kh',type:'radio',label:'Số khách dự kiến dùng mỗi tháng',opts:[['<500','Dưới 500'],['500-5000','500 đến 5.000'],['5000+','Trên 5.000']]}
+ ]},
+ {id:'s6',title:'Ngân sách',desc:'Không bắt buộc chính xác, giúp mình đề xuất phương án vừa túi tiền.',qs:[
+  {id:'ngan_sach',type:'radio',label:'Ngân sách dự kiến cho phần làm mới (chưa gồm phí duy trì)',req:true,opts:[
+    ['<5','Dưới 5 triệu'],['5-15','5 đến 15 triệu'],['15-30','15 đến 30 triệu'],['30-50','30 đến 50 triệu'],
+    ['50-100','50 đến 100 triệu'],['100-200','100 đến 200 triệu'],['200+','Trên 200 triệu'],['chua_ro','Chưa xác định, cần tư vấn']]},
+  {id:'thoi_gian',type:'radio',label:'Khi nào bạn cần đưa vào sử dụng?',req:true,opts:[
+    ['gap','Rất gấp, trong 2 tuần'],['1thang','Trong khoảng 1 tháng'],['2-3thang','Trong 2 đến 3 tháng'],['4-6thang','Trong 4 đến 6 tháng'],['linh_hoat','Linh hoạt, làm kỹ là được']]},
+  {id:'bat_dau',type:'radio',label:'Bạn dự định bắt đầu khi nào?',opts:[
+    ['ngay','Ngay khi chốt phương án'],['thang_nay','Trong tháng này'],['quy','Trong quý này'],['tham_khao','Đang tham khảo giá']]},
+  {id:'van_hanh',type:'radio',label:'Sau khi bàn giao, bạn muốn vận hành thế nào?',req:true,opts:[
+    ['tu_quan','Tự quản lý, chỉ cần duy trì tên miền, hosting'],['co_ban','Cần hỗ trợ khi có lỗi, sao lưu định kỳ'],['tron_goi','Giao trọn gói: giám sát, cập nhật bảo mật, chỉnh sửa nhỏ hằng tháng']]},
+  {id:'su_co',type:'radio',label:'Nếu hệ thống ngừng hoạt động, mức ảnh hưởng thế nào?',opts:[
+    ['it','Không sao, chờ vài ngày được'],['trong_ngay','Cần khắc phục trong ngày'],['gio','Nghiêm trọng, cần xử lý trong vài giờ kể cả ngoài giờ']]},
+  {id:'vat',type:'radio',label:'Bạn có cần xuất hóa đơn VAT không?',opts:[['co','Có'],['khong','Không']]},
+  {id:'lien_he_qua',type:'check',label:'Bạn muốn trao đổi tiếp qua kênh nào?',opts:[['zalo','Zalo'],['goi','Gọi điện'],['email','Email'],['hop','Họp online (Google Meet / Zoom)']]},
+  {id:'ghi_chu',type:'textarea',label:'Điều gì khác bạn muốn mình biết?'}
+ ]}
+];
+
+/* ============================================================
+   TRẠNG THÁI, LƯU NHÁP
+   ============================================================ */
+var KEY='khaosat_nhucau_v1', ans={}, cur=0, done=false;
+var internal=/[?&]noibo=1/.test(location.search);
+try{var saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved&&saved.ans){ans=saved.ans;cur=saved.cur||0;}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({ans:ans,cur:cur}))}catch(e){}schedulePush()}
+
+/* ---------- tự lưu lên máy chủ (nếu có ENDPOINT) ---------- */
+function newSid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+var sid=(function(){try{var x=localStorage.getItem(KEY+'_sid');if(!x){x=newSid();localStorage.setItem(KEY+'_sid',x)}return x}catch(e){return newSid()}})();
+var pushTimer=null;
+function record(status){
+  var vs=visibleSteps(), rec={sid:sid,cap_nhat:new Date().toISOString(),trang_thai:status,
+    buoc:(done?vs.length:cur+1)+'/'+vs.length,ho_ten:ans.ho_ten||'',cong_ty:ans.cong_ty||'',sdt:ans.sdt||'',email:ans.email||'',
+    linh_vuc:ans.linh_vuc?labelOf('linh_vuc',ans.linh_vuc,ans):'',
+    muc_tieu:(ans.muc_tieu||[]).map(function(x){return labelOf('muc_tieu',x,ans)}),
+    ngan_sach:ans.ngan_sach?labelOf('ngan_sach',ans.ngan_sach):'',answers:ans};
+  if(status==='hoan_thanh'){try{
+    var r=analyze(ans);
+    rec.goi_de_xuat=r.items.map(function(i){return i.name}).concat(r.addons.map(function(x){return x.name}));
+    rec.tong_thap=r.low;rec.tong_cao=r.high;rec.van_hanh=r.ops.name;rec.phan_loai=r.lead;rec.canh_bao=r.flags.join(' | ');rec.tom_tat=summary(ans,r);
+  }catch(e){}}
+  return rec;
+}
+function push(status){
+  clearTimeout(pushTimer);
+  if(!ENDPOINT||!(ans.ho_ten||ans.sdt))return; // chưa có thông tin liên hệ thì chưa lưu
+  try{fetch(ENDPOINT,{method:'POST',mode:ENDPOINT.charAt(0)==='/'?'same-origin':'no-cors',keepalive:true,
+    headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(record(status))}).catch(function(){})}catch(e){}
+}
+function schedulePush(){
+  if(!ENDPOINT)return;
+  clearTimeout(pushTimer);
+  pushTimer=setTimeout(function(){push(done?'hoan_thanh':'dang_dien')},1500);
+}
+
+function visibleSteps(){return STEPS.filter(function(s){return !s.show||s.show(ans)})}
+function visibleQs(s){return s.qs.filter(function(q){return !q.show||q.show(ans)})}
+
+var $=function(id){return document.getElementById(id)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+
+/* ---------- vẽ form ---------- */
+function renderSteps(){
+  var vs=visibleSteps();
+  $('steps').innerHTML=vs.map(function(s,i){
+    var cls=i===cur&&!done?'on':(i<cur||done?'done':'');
+    return '<li class="'+cls+'" data-i="'+i+'">'+(i+1)+'. '+esc(s.title)+'</li>';
+  }).join('')+'<li class="'+(done?'on':'')+'" data-i="res">Kết quả</li>';
+  var st=$('steps'),on=st.querySelector('.on');
+  if(on)st.scrollLeft=Math.max(0,on.offsetLeft-(st.clientWidth-on.offsetWidth)/2);
+  var pct=done?100:Math.round(cur/vs.length*100);
+  $('bar').style.width=pct+'%';
+}
+function renderQ(q){
+  var v=ans[q.id], hh=res(q.h), opts=getOpts(q), h='<div class="q" id="q_'+q.id+'">';
+  var lab=esc(q.label)+(q.req?' <span class="req">*</span>':'');
+  if(q.type==='radio'||q.type==='check'){
+    h+='<span class="t">'+lab+'</span>'+(hh?'<span class="h">'+esc(hh)+'</span>':'')+'<div class="opts" role="group" aria-label="'+esc(q.label)+'">';
+    opts.forEach(function(o){
+      var on=q.type==='radio'?v===o[0]:Array.isArray(v)&&v.indexOf(o[0])>=0;
+      h+='<label class="opt'+(on?' on':'')+'"><input type="'+(q.type==='radio'?'radio':'checkbox')+'" name="'+q.id+'" value="'+o[0]+'"'+(on?' checked':'')+'><span>'+esc(o[1])+(o[2]?'<small>'+esc(o[2])+'</small>':'')+'</span></label>';
+    });
+    h+='</div>';
+  }else{
+    h+='<label class="t" for="f_'+q.id+'">'+lab+'</label>'+(hh?'<span class="h">'+esc(hh)+'</span>':'');
+    if(q.type==='textarea')h+='<textarea id="f_'+q.id+'" name="'+q.id+'">'+esc(v||'')+'</textarea>';
+    else h+='<input id="f_'+q.id+'" name="'+q.id+'" type="'+q.type+'" value="'+esc(v||'')+'"'+(q.type==='tel'?' inputmode="tel"':'')+'>';
+  }
+  return h+'<div class="err">Vui lòng trả lời câu này.</div></div>';
+}
+function renderForm(){
+  var vs=visibleSteps(); if(cur>=vs.length)cur=vs.length-1;
+  var s=vs[cur];
+  visibleQs(s).forEach(function(q){
+    if(typeof q.opts!=='function'||ans[q.id]==null)return;
+    var ok=getOpts(q).map(function(o){return o[0]});
+    if(Array.isArray(ans[q.id]))ans[q.id]=ans[q.id].filter(function(x){return ok.indexOf(x)>=0});
+    else if(ok.indexOf(ans[q.id])<0)delete ans[q.id];
+  });
+  $('form').innerHTML='<div class="card"><p class="mono">Bước '+(cur+1)+' / '+vs.length+'</p><h2>'+esc(s.title)+'</h2><p class="sub">'+esc(s.desc)+'</p>'+
+    visibleQs(s).map(renderQ).join('')+'</div>'+
+    '<div class="nav"><button type="button" class="btn ghost" id="prev"'+(cur===0?' disabled':'')+'>← Quay lại</button>'+
+    '<button type="submit" class="btn">'+(cur===vs.length-1?'Xem gợi ý →':'Tiếp tục →')+'</button></div>';
+  $('form').style.display='';$('result').innerHTML='';
+  $('prev').onclick=function(){cur--;save();go()};
+  renderSteps();
+}
+function readStep(){
+  var s=visibleSteps()[cur];
+  s.qs.forEach(function(q){
+    var f=$('form');
+    if(q.type==='check'){
+      var els=f.querySelectorAll('input[name="'+q.id+'"]'); if(!els.length)return;
+      ans[q.id]=[].filter.call(els,function(e){return e.checked}).map(function(e){return e.value});
+    }else if(q.type==='radio'){
+      var c=f.querySelector('input[name="'+q.id+'"]:checked'); if(c)ans[q.id]=c.value;
+    }else{
+      var el=$('f_'+q.id); if(el)ans[q.id]=el.value.trim();
+    }
+  });
+}
+function validStep(){
+  var ok=true,first=null;
+  visibleQs(visibleSteps()[cur]).forEach(function(q){
+    var v=ans[q.id], empty=v==null||v===''||(Array.isArray(v)&&!v.length);
+    if(q.id==='sdt'&&!empty&&!/^[0-9 +().-]{8,}$/.test(v))empty=true;
+    var box=$('q_'+q.id); if(box)box.classList.toggle('bad',!!(q.req&&empty));
+    if(q.req&&empty){ok=false;first=first||box;}
+  });
+  if(first)first.scrollIntoView({behavior:'smooth',block:'center'});
+  return ok;
+}
+$('form').addEventListener('change',function(e){
+  [].forEach.call($('form').querySelectorAll('.opt'),function(l){var i=l.querySelector('input');l.classList.toggle('on',!!(i&&i.checked))});
+  readStep();save();
+  // các câu có điều kiện trong cùng bước: vẽ lại để hiện/ẩn
+  var s=visibleSteps()[cur], n=visibleQs(s).length, shown=$('form').querySelectorAll('.q').length;
+  if(n!==shown){var y=scrollY;renderForm();scrollTo(0,y);}
+});
+$('form').addEventListener('submit',function(e){
+  e.preventDefault();readStep();
+  if(!validStep())return;
+  save();
+  if(cur<visibleSteps().length-1){cur++;save();go();}else{done=true;go();}
+});
+$('steps').addEventListener('click',function(e){
+  var li=e.target.closest('li');if(!li)return;
+  if(li.dataset.i==='res')return;
+  var i=+li.dataset.i; if(i<=cur||done){if(!done)readStep();done=false;cur=i;save();go();}
+});
+function go(){
+  if(done){$('form').style.display='none';renderSteps();renderResult();push('hoan_thanh');}
+  else renderForm();
+  scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ============================================================
+   PHÂN TÍCH, ĐỀ XUẤT GÓI VÀ ĐỊNH GIÁ
+   ============================================================ */
+var BUDGET={'<5':[0,5e6],'5-15':[5e6,15e6],'15-30':[15e6,30e6],'30-50':[30e6,50e6],'50-100':[50e6,100e6],'100-200':[100e6,200e6],'200+':[200e6,Infinity]};
+var DEADLINE_WEEKS={gap:2,'1thang':4,'2-3thang':12,'4-6thang':26,linh_hoat:99};
+function r5(n){return Math.round(n/5e5)*5e5}
+function money(n){return n.toLocaleString('vi-VN')+' đ'}
+function trieu(n){var t=n/1e6;return (Math.round(t*10)/10).toLocaleString('vi-VN')+' triệu'}
+
+function analyze(a){
+  var items=[], addons=[], notes=[], ask=[], flags=[], backend=false, weeks=[];
+  var goals=a.muc_tieu||[], fn=a.chuc_nang||[];
+  var unknownOnly=goals.length===1&&goals[0]==='unknown';
+  function addon(k,why){var x=PRICE.addon[k];addons.push({name:x.name,price:x.price,est:!!x.est,why:why||''});}
+
+  // --- 1. Website ---
+  if(wantsWeb(a)||(unknownOnly&&a.nguoi_dung!=='noi_bo')){
+    var lv=(has(a,'muc_tieu','landing')&&goals.filter(function(g){return g!=='unknown'}).length===1&&a.so_trang==='1')?0:1;
+    var why=[];
+    if(a.so_trang==='15+'){lv=Math.max(lv,2);why.push('trên 15 trang');}
+    if(has(a,'muc_tieu','cms')){lv=Math.max(lv,2);why.push('cần tự đăng bài, SEO lâu dài');}
+    if(a.cap_nhat==='thang'||a.cap_nhat==='tuan'){lv=Math.max(lv,2);why.push('cập nhật nội dung thường xuyên');}
+    if(a.ai_cap_nhat==='tu_lam'&&a.cap_nhat!=='hiem'){lv=Math.max(lv,2);why.push('tự cập nhật nội dung');}
+    if(a.giao_dien==='rieng'){lv=Math.max(lv,2);why.push('thiết kế riêng');}
+    if(fn.indexOf('thu_vien')>=0){lv=Math.max(lv,2);why.push('thư viện ảnh/video');}
+    // các chức năng cần lập trình riêng: từ 2 mục trở lên thì lên Cao cấp
+    var hi=['dang_nhap','dat_lich','email_tu_dong'].filter(function(k){return fn.indexOf(k)>=0});
+    var premium=hi.length+(a.ngon_ngu==='vi_en'?1:0)+(fn.indexOf('thanh_toan')>=0?1:0);
+    if(hi.length||premium>=2){lv=3;why.push('cần chức năng lập trình riêng ('+[a.ngon_ngu==='vi_en'?'đa ngôn ngữ':'',fn.indexOf('thanh_toan')>=0?'thanh toán':''].concat(hi.map(function(k){return{dang_nhap:'đăng nhập',dat_lich:'đặt lịch',email_tu_dong:'email tự động'}[k]})).filter(Boolean).join(', ')+')');}
+    if(has(a,'muc_tieu','shop')||fn.indexOf('gio_hang')>=0)lv=Math.max(lv,1);
+    var w=PRICE.web[lv];
+    items.push({type:'web',name:w.name,price:w.price,inc:w.inc,why:why,weeks:w.weeks,wmax:w.wmax});
+    weeks.push(w.weeks); if(lv>=2)backend=true;
+
+    if(lv<3&&a.ngon_ngu==='vi_en')addon('dangonngu');
+    if(a.ngon_ngu==='gg')addon('ggdich');
+    if(lv<3&&fn.indexOf('thanh_toan')>=0)addon('thanhtoan');
+    if(has(a,'muc_tieu','shop')||fn.indexOf('gio_hang')>=0){
+      addon('giohang');backend=true;weeks[weeks.length-1]+=2;
+      if(a.so_san_pham==='500+')notes.push('Trên 500 sản phẩm: cần nhập liệu hàng loạt từ Excel, cân nhắc thêm module Nhập/xuất Excel.');
+    }
+    if(fn.indexOf('popup')>=0)addon('popup');
+    if(fn.indexOf('leadform')>=0)addon('leadform');
+    if(fn.indexOf('chat')>=0&&lv<3)addon('chat');
+    if(fn.indexOf('tintuc')>=0&&lv<2){addon('tintuc','gói dưới Nâng cao chưa có CMS');var cw=Math.max(w.weeks,4);items[items.length-1].weeks=cw;items[items.length-1].wmax=Math.max(w.wmax||0,6);weeks[weeks.length-1]=cw;} // Cơ bản + CMS: 4 đến 6 tuần
+    if(fn.indexOf('day_crm')>=0&&!wantsSys(a))addon('tichhopcrm');
+    if(a.nhan_dien==='chua')notes.push('Khách chưa có logo/bộ nhận diện: báo riêng phần thiết kế nhận diện hoặc giới thiệu đối tác.');
+    if(a.noi_dung==='chua')notes.push('Khách chưa có nội dung: báo riêng phí biên soạn nội dung, hình ảnh.');
+    if(fn.indexOf('thanh_toan')>=0)ask.push('Đã có tài khoản doanh nghiệp VNPay/MoMo chưa? (cần để kích hoạt cổng thanh toán)');
+    if(fn.indexOf('dat_lich')>=0)ask.push('Đặt lịch theo nhân viên, theo phòng hay theo khung giờ? Có cần đặt cọc không?');
+    if(a.so_trang==='chua_ro')ask.push('Chốt danh sách trang (sitemap) trong buổi trao đổi.');
+  }
+
+  // --- 2. CRM / hệ thống quản lý ---
+  if(wantsSys(a)||(unknownOnly&&a.nguoi_dung==='noi_bo')){
+    var nv=a.nghiep_vu||[], crmSet=['khach_hang','pipeline','bao_gia','nhac_viec','bao_cao'];
+    var ops=nv.filter(function(k){return crmSet.indexOf(k)<0});
+    var isQL=has(a,'muc_tieu','ql')||ops.length>0;
+    var base=isQL?PRICE.ql:PRICE.crm, f=1, fwhy=[];
+    if(isQL){
+      var n=nv.length;
+      if(n&&n<=3){f-=0.2;fwhy.push('ít nghiệp vụ ('+n+')');}
+      if(n>7){f+=0.05*(n-7);fwhy.push('nhiều nghiệp vụ ('+n+')');}
+      if(has(a,'muc_tieu','crm')&&(nv.indexOf('pipeline')>=0||nv.indexOf('bao_gia')>=0))addon('crmmodule','vừa cần CRM vừa cần quản lý vận hành');
+    }
+    if(a.so_user==='21-50'){f+=0.1;fwhy.push('21 đến 50 người dùng');}
+    if(a.so_user==='50+'){f+=0.25;fwhy.push('trên 50 người dùng');}
+    if(a.chi_nhanh==='2-3'){f+=0.1;fwhy.push('2 đến 3 chi nhánh');}
+    if(a.chi_nhanh==='4+'){f+=0.2;fwhy.push('từ 4 chi nhánh');}
+    if(a.phan_quyen==='phuc_tap'){f+=0.1;fwhy.push('phân quyền nhiều cấp');}
+    var p=r5(base.price*f);
+    items.push({type:'sys',name:base.name,price:p,inc:base.inc,why:fwhy,range:true,weeks:Math.ceil(base.weeks*Math.max(f,0.8))});
+    weeks.push(Math.ceil(base.weeks*Math.max(f,0.8))); backend=true;
+    (a.tich_hop||[]).forEach(function(k){if(PRICE.addon[k])addon(k);});
+    if(a.du_lieu==='nhieu'){notes.push('Chuyển dữ liệu từ nhiều nguồn: báo riêng sau khi xem dữ liệu mẫu.');ask.push('Xin file dữ liệu mẫu (Excel) để ước lượng công chuyển đổi.');}
+    if(a.nen_tang==='app'){flags.push('Khách cần app di động cài riêng: phần app báo riêng (thường cộng thêm 40 đến 60% giá hệ thống). Gợi ý bản web chạy tốt trên điện thoại trước.');}
+    if(has(a,'tich_hop','ketoan'))ask.push('Phần mềm kế toán nào, phiên bản nào, có API không?');
+    if(nv.length)ask.push('Xin quy trình làm việc hiện tại của từng nghiệp vụ (mẫu biểu, file Excel đang dùng).');
+  }
+
+  // --- 3. Zalo Mini App ---
+  if(wantsMini(a)){
+    var mc=a.mini_cn||[];
+    var adv=['ban_hang','tich_diem','thanh_toan','zns'].some(function(k){return mc.indexOf(k)>=0});
+    var m=adv?PRICE.mini.adv:PRICE.mini.basic;
+    items.push({type:'mini',name:m.name,price:m.price,inc:m.inc,why:adv?['có bán hàng / tích điểm / thanh toán / ZNS']:['giới thiệu, đặt lịch, điểm danh'],weeks:m.weeks});
+    weeks.push(m.weeks); if(adv)backend=true;
+    if(a.zalo_oa!=='co')ask.push('Zalo OA chưa xác thực: cần xác thực OA trước khi đăng Mini App (khách tự làm, mình hướng dẫn).');
+    if(a.mini_kh==='5000+')notes.push('Trên 5.000 khách/tháng: chọn VPS mạnh hơn, xem lại gói vận hành.');
+  }
+
+  if(!items.length){ // không chọn gì cụ thể
+    var w0=PRICE.web[1];items.push({type:'web',name:w0.name,price:w0.price,inc:w0.inc,why:['khách chưa rõ nhu cầu, lấy gói phổ biến làm mốc'],weeks:w0.weeks});weeks.push(w0.weeks);
+  }
+  if(unknownOnly)flags.push('Khách chọn “Chưa rõ”: gợi ý chỉ là mốc, cần gọi tư vấn để xác định nhu cầu.');
+
+  // --- 4. Tổng chi phí ---
+  var low=0,high=0;
+  items.forEach(function(i){low+=i.range?r5(i.price*0.9):i.price;high+=i.range?r5(i.price*1.2):i.price;});
+  addons.forEach(function(x){low+=x.price;high+=x.price;});
+  if(addons.some(function(x){return x.est})||items.some(function(i){return i.range}))high=Math.max(high,low);
+  var rush=false;
+  weeks.sort(function(x,y){return y-x});
+  var wk=weeks.length?weeks[0]+Math.ceil(weeks.slice(1).reduce(function(s,x){return s+x},0)*0.3):2;
+  var wkHi=Math.ceil(wk*1.5);
+  var dl=DEADLINE_WEEKS[a.thoi_gian]||99;
+  if(dl<wk){rush=true;flags.push('Thời hạn khách muốn ('+dl+' tuần) ngắn hơn ước tính ('+wk+' tuần): đề xuất chia giai đoạn, ra mắt bản rút gọn trước, hoặc tính phí làm gấp.');}
+
+  // --- 5. Gói vận hành ---
+  var opsKey=backend?'tieuchuan':'coban';
+  if(a.van_hanh==='tron_goi')opsKey='tieuchuan';
+  if(a.su_co==='gio'||(a.su_co==='trong_ngay'&&a.van_hanh==='tron_goi'&&backend))opsKey='nangcao';
+  if(a.van_hanh==='tu_quan'&&backend)notes.push('Khách muốn tự quản lý nhưng sản phẩm có máy chủ, cơ sở dữ liệu: vẫn khuyên tối thiểu gói Tiêu chuẩn để có cập nhật bảo mật và sao lưu.');
+  var ops=PRICE.ops[opsKey];
+
+  // --- 6. So với ngân sách ---
+  var fit='unknown', b=BUDGET[a.ngan_sach];
+  if(b){
+    if(b[1]<low)fit='under';else if(b[0]>high*1.3)fit='over';else fit='ok';
+    if(fit==='under')flags.push('Ngân sách ('+labelOf('ngan_sach',a.ngan_sach)+') thấp hơn ước tính ('+trieu(low)+'): đề xuất làm giai đoạn 1 gọn, bỏ chức năng chưa cần, hoặc hạ cấp gói.');
+    if(fit==='over')notes.push('Ngân sách cao hơn ước tính: có thể đề xuất thêm thiết kế riêng, đa ngôn ngữ, gói vận hành cao hơn hoặc giai đoạn 2.');
+  }
+
+  // --- 7. Chấm điểm khách tiềm năng ---
+  var score=0;
+  if(a.vai_tro==='chu')score+=3;else if(a.vai_tro==='quanly')score+=2;else score+=1;
+  if(fit==='ok'||fit==='over')score+=3;else if(fit==='unknown')score+=1;
+  if(a.bat_dau==='ngay'||a.bat_dau==='thang_nay')score+=3;else if(a.bat_dau==='quy')score+=2;
+  if(a.van_de&&a.van_de.length>30)score+=1;
+  var lead=score>=8?'Nóng':score>=5?'Ấm':'Lạnh';
+
+  return {items:items,addons:addons,low:low,high:high,weeks:wk,weeksHi:wkHi,ops:ops,opsKey:opsKey,notes:notes,ask:ask,flags:flags,fit:fit,lead:lead,score:score,rush:rush};
+}
+
+function labelOf(qid,v,a){
+  for(var i=0;i<STEPS.length;i++)for(var j=0;j<STEPS[i].qs.length;j++){var q=STEPS[i].qs[j];if(q.id!==qid)continue;
+    if(!q.opts)return v;
+    var lists=typeof q.opts==='function'?[q.opts(a||{})].concat(Object.keys(SECTORS).map(function(k){return q.opts({linh_vuc:k})})):[q.opts];
+    for(var m=0;m<lists.length;m++){var o=lists[m].filter(function(o){return o[0]===v})[0];if(o)return o[1];}
+    return v;}
+  return v;
+}
+function wkText(i){var hi=i.wmax||Math.ceil(i.weeks*1.5);return i.weeks+(hi>i.weeks?' – '+hi:'')+' tuần'}
+function priceText(r){return r.low===r.high?money(r.low):'khoảng '+trieu(r.low)+' đến '+trieu(r.high)}
+
+/* ---------- mã khảo sát: để mở lại toàn bộ câu trả lời ở chế độ nội bộ ---------- */
+function encode(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o))))}
+function decode(s){return JSON.parse(decodeURIComponent(escape(atob(s.trim()))))}
+
+/* ---------- bản tóm tắt gửi đi ---------- */
+function summary(a,r,short){
+  var L=[],d=new Date();
+  L.push('KHẢO SÁT NHU CẦU: '+(a.cong_ty||'')+' ('+(a.ho_ten||'')+')');
+  L.push('Ngày: '+d.toLocaleDateString('vi-VN'));
+  if(short){
+    L.push('Liên hệ: '+(a.sdt||'')+(a.email?' · '+a.email:''));
+    L.push('Nhu cầu: '+(a.muc_tieu||[]).map(function(x){return labelOf('muc_tieu',x,a)}).join('; '));
+    if(a.van_de)L.push('Mô tả: '+a.van_de);
+  }
+  else visibleSteps().forEach(function(s){
+    L.push('');L.push('== '+s.title.toUpperCase()+' ==');
+    visibleQs(s).forEach(function(q){
+      var v=a[q.id]; if(v==null||v===''||(Array.isArray(v)&&!v.length))return;
+      var t=Array.isArray(v)?v.map(function(x){return labelOf(q.id,x,a)}).join('; '):labelOf(q.id,v,a);
+      L.push('- '+q.label+': '+t);
+    });
+  });
+  L.push('');L.push('== GỢI Ý SƠ BỘ ==');
+  r.items.forEach(function(i){L.push('- '+i.name+' (dự kiến '+wkText(i)+')')});
+  r.addons.forEach(function(x){L.push('  + '+x.name)});
+  if(SHOW_PRICE){L.push('Chi phí tham khảo (chưa VAT): '+priceText(r));L.push('Phí duy trì: '+r.ops.name+', khoảng '+money(Math.round(r.ops.fee/1000)*1000)+'/tháng');}
+  L.push('Thời gian dự kiến: '+r.weeks+' đến '+r.weeksHi+' tuần');
+  L.push('');if(short)L.push('(Toàn bộ câu trả lời nằm trong mã bên dưới.)');L.push('Mã khảo sát: '+encode(a));
+  return L.join('\n');
+}
+
+/* ---------- vẽ kết quả ---------- */
+function renderResult(a0){
+  var a=a0||ans, r=analyze(a), h='';
+  if(!a0){
+    h+='<div class="card res"><p class="mono">Gợi ý sơ bộ</p><h2>Phương án phù hợp với '+esc(a.cong_ty||'bạn')+'</h2>';
+    r.items.forEach(function(i){
+      h+='<div class="pk"><div class="top-row"><b class="name">'+esc(i.name)+'</b>'+(SHOW_PRICE?'<span class="price">'+(i.range?'từ '+trieu(r5(i.price*0.9)):money(i.price))+'</span>':'')+'<span class="wk">Thời gian dự kiến: <b>'+wkText(i)+'</b></span></div><ul>'+i.inc.map(function(x){return'<li>'+esc(x)+'</li>'}).join('')+'</ul></div>';
+    });
+    if(r.addons.length){
+      h+='<h3>Chức năng cộng thêm</h3><table><tbody>'+r.addons.map(function(x){return'<tr><td>'+esc(x.name)+'</td>'+(SHOW_PRICE?'<td class="n">'+money(x.price)+'</td>':'')+'</tr>'}).join('')+'</tbody></table>';
+    }
+    h+='<div class="kpi">'+
+      (SHOW_PRICE?'<div><span>Chi phí làm mới (chưa VAT)</span><strong>'+(r.low===r.high?trieu(r.low):trieu(r.low)+' – '+trieu(r.high))+'</strong></div>':'')+
+      '<div><span>Tổng thời gian dự kiến</span><strong>'+r.weeks+' – '+r.weeksHi+' tuần</strong></div>'+
+      (SHOW_PRICE?'<div><span>'+esc(r.ops.name)+'</span><strong>~'+trieu(r.ops.fee)+'/tháng</strong></div>':'')+'</div>';
+    if(r.fit==='under')h+='<div class="warnbox"><b>Về ngân sách:</b> phương án gợi ý có thể vượt mức bạn dự kiến. Đừng lo, mình có thể chia thành nhiều giai đoạn, làm phần quan trọng nhất trước.</div>';
+    if(r.rush)h+='<div class="warnbox"><b>Về thời gian:</b> thời hạn bạn cần khá gấp so với khối lượng. Mình sẽ đề xuất ra mắt bản rút gọn trước để kịp tiến độ.</div>';
+    h+='<p class="note">Đây là gói gợi ý tự động để bạn hình dung, chưa phải báo giá chính thức. Chi phí cụ thể sẽ được trao đổi sau buổi tư vấn ngắn.</p>';
+    h+='<h3>Gửi khảo sát cho Minh Phú</h3><p class="note" style="margin-top:.3rem">Bấm “Gửi qua Gmail” rồi bấm Gửi trong thư vừa mở. Nếu không dùng Gmail, chọn “Gửi bằng ứng dụng mail”, hoặc bấm “Sao chép” rồi dán vào tin nhắn Zalo '+CONTACT.zalo.replace(/(\d{4})(\d{3})(\d{3})/,'$1 $2 $3')+'.</p>'+
+      '<div class="actions"><a class="btn" id="gmail" target="_blank" rel="noopener">Gửi qua Gmail</a><a class="btn ghost" id="mail">Gửi bằng ứng dụng mail</a><button type="button" class="btn ghost" id="copy">Sao chép</button>'+
+      '<a class="btn ghost" href="https://zalo.me/'+CONTACT.zalo+'" target="_blank" rel="noopener">Mở Zalo</a><button type="button" class="btn ghost" id="dl">Tải file .txt</button>'+
+      '<button type="button" class="btn ghost" id="edit">Sửa câu trả lời</button><button type="button" class="btn ghost" id="reset">Làm phiếu mới</button></div></div>';
+  }
+  if(internal||a0)h+=renderInternal(a,r);
+  $('result').innerHTML=h;
+  if(!a0){
+    var txt=summary(a,r);
+    var subj=encodeURIComponent('Khảo sát nhu cầu: '+(a.cong_ty||a.ho_ten||'')), body=encodeURIComponent(summary(a,r,true));
+    $('gmail').href='https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(CONTACT.email)+'&su='+subj+'&body='+body;
+    $('mail').href='mailto:'+CONTACT.email+'?subject='+encodeURIComponent('Khảo sát nhu cầu: '+(a.cong_ty||a.ho_ten||''))+'&body='+encodeURIComponent(summary(a,r,true));
+    $('copy').onclick=function(){copy(txt)};
+    $('dl').onclick=function(){var b=new Blob([txt],{type:'text/plain;charset=utf-8'}),u=URL.createObjectURL(b),l=document.createElement('a');l.href=u;l.download='khao-sat-'+((a.cong_ty||'khach').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/[^a-z0-9]+/g,'-'))+'.txt';l.click();URL.revokeObjectURL(u);};
+    $('edit').onclick=function(){done=false;cur=0;go()};
+    $('reset').onclick=function(){if(!confirm('Xóa toàn bộ câu trả lời để làm phiếu mới?'))return;ans={};cur=0;done=false;try{localStorage.removeItem(KEY);localStorage.removeItem(KEY+'_sid')}catch(e){}sid=newSid();try{localStorage.setItem(KEY+'_sid',sid)}catch(e){}go()};
+  }
+  bindImport();
+}
+
+/* ---------- chế độ nội bộ: ?noibo=1 ---------- */
+function renderInternal(a,r){
+  var rows='';
+  r.items.forEach(function(i){rows+='<tr><td><b>'+esc(i.name)+'</b>'+(i.why.length?'<br><small>Lý do: '+esc(i.why.join('; '))+'</small>':'')+'</td><td class="n">'+(i.range?trieu(r5(i.price*0.9))+' – '+trieu(r5(i.price*1.2)):money(i.price))+'</td></tr>'});
+  r.addons.forEach(function(x){rows+='<tr><td>+ '+esc(x.name)+(x.est?' <small>(ước tính, cần xác nhận)</small>':'')+(x.why?'<br><small>'+esc(x.why)+'</small>':'')+'</td><td class="n">'+money(x.price)+'</td></tr>'});
+  var vatLo=Math.round(r.low*(1+PRICE.vat)),vatHi=Math.round(r.high*(1+PRICE.vat));
+  var li=function(arr){return arr.length?'<ul>'+arr.map(function(x){return'<li>'+esc(x)+'</li>'}).join('')+'</ul>':'<p class="note">Không có.</p>'};
+  return '<div class="card internal"><p class="mono">Nội bộ · chỉ Minh Phú xem</p><h2>Phân tích: '+esc(a.cong_ty||'')+' <span class="tag">Khách '+r.lead+' · '+r.score+'/10</span></h2>'+
+    '<p class="sub">'+esc(a.ho_ten||'')+' · '+esc(labelOf('vai_tro',a.vai_tro)||'')+' · '+esc(a.sdt||'')+' · '+esc(labelOf('linh_vuc',a.linh_vuc)||'')+'</p>'+
+    (a.van_de?'<p class="note">“'+esc(a.van_de)+'”</p>':'')+
+    '<h3>Bảng giá đề xuất</h3><table><thead><tr><th>Hạng mục</th><th class="n">Giá (chưa VAT)</th></tr></thead><tbody>'+rows+
+    '<tr><th>Tổng chưa VAT</th><th class="n">'+(r.low===r.high?money(r.low):money(r.low)+' – '+money(r.high))+'</th></tr>'+
+    '<tr><td>Đã gồm VAT '+PRICE.vat*100+'%</td><td class="n">'+(vatLo===vatHi?money(vatLo):money(vatLo)+' – '+money(vatHi))+'</td></tr>'+
+    '<tr><td>'+esc(r.ops.name)+' ('+esc(r.ops.sla)+')</td><td class="n">'+money(Math.round(r.ops.fee))+'/tháng</td></tr></tbody></table>'+
+    '<div class="kpi"><div><span>Ngân sách khách</span><strong>'+esc(labelOf('ngan_sach',a.ngan_sach)||'—')+'</strong></div><div><span>Khớp ngân sách</span><strong>'+{ok:'Phù hợp',under:'Thấp hơn',over:'Dư',unknown:'Chưa rõ'}[r.fit]+'</strong></div><div><span>Thời gian</span><strong>'+r.weeks+' – '+r.weeksHi+' tuần</strong></div></div>'+
+    '<h3>Cảnh báo</h3>'+li(r.flags)+'<h3>Ghi chú định giá</h3>'+li(r.notes)+'<h3>Câu cần hỏi lại khi gọi</h3>'+li(r.ask)+
+    '<p class="note">Cập nhật trong sheet Hạng mục: đặt 1 ở cột Chọn cho các hạng mục trên để ra báo giá chính thức.</p></div>';
+}
+function bindImport(){
+  if(!internal)return;
+  if(!$('imp')){
+    var d=document.createElement('div');d.className='card internal';d.id='impbox';
+    d.innerHTML='<p class="mono">Nội bộ</p><h2>Mở khảo sát khách gửi</h2><p class="sub">Dán “Mã khảo sát” ở cuối email/tin nhắn của khách.</p><div class="q"><textarea id="imp" aria-label="Mã khảo sát"></textarea></div><div class="actions"><button type="button" class="btn" id="impgo">Phân tích</button></div><div id="impout"></div>';
+    $('imp-wrap').appendChild(d);
+  }
+  $('impgo').onclick=function(){
+    try{var raw=$('imp').value.replace(/^[\s\S]*Mã khảo sát:\s*/,'');var a=decode(raw);
+      var keep=ans;ans=a;var html=renderInternal(a,analyze(a))+'<pre style="white-space:pre-wrap;font-size:.8rem">'+esc(summary(a,analyze(a)).replace(/\nMã khảo sát:.*$/,''))+'</pre>';ans=keep;
+      $('impout').innerHTML=html;}
+    catch(e){$('impout').innerHTML='<p class="err" style="display:block">Mã không hợp lệ.</p>';}
+  };
+}
+
+/* ---------- tiện ích ---------- */
+function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on')},1800)}
+function copy(t){
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(function(){toast('Đã sao chép')},fallback);else fallback();
+  function fallback(){var x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();try{document.execCommand('copy');toast('Đã sao chép')}catch(e){}x.remove();}
+}
+var root=document.documentElement;
+$('theme').onclick=function(){
+  var dark=root.getAttribute('data-theme')==='dark'||(!root.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme: dark)').matches);
+  root.setAttribute('data-theme',dark?'light':'dark');
+};
+
+if(ENDPOINT)$('privacy').hidden=false;
+go();
+if(internal&&!done)bindImport();
+})();
+</script>
+</body>
+</html>

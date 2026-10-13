@@ -1,0 +1,275 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Nguyễn Phan Minh Phú</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Be+Vietnam+Pro:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: một cột 1040px theo đúng luồng trang gốc (Dịch vụ, Giải pháp, Kết quả, Quy trình, Câu hỏi, Liên hệ). Mực xanh đậm trên giấy lạnh, đỏ ấn chỉ dành cho hạn và cảnh báo. */
+:root{
+  --bg:#f3f5f8;--surface:#ffffff;--fg:#14233b;--muted:#586377;--line:#d8dee8;
+  --ink:#14233b;--seal:#a3282f;--seal-bg:#f8e3e4;--ok:#1d6b45;--ok-bg:#dff1e6;--amber:#8a5a00;--amber-bg:#fbeccb;
+  --display:'Bricolage Grotesque','Be Vietnam Pro',system-ui,sans-serif;
+  --body:'Be Vietnam Pro',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1522;--surface:#161f30;--fg:#e7ecf4;--muted:#9aa6bb;--line:#2a364c;
+  --ink:#9fc0ee;--seal:#ff8a90;--seal-bg:#3d1c20;--ok:#6fd0a0;--ok-bg:#16352a;--amber:#e8b95a;--amber-bg:#3a2d12;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1522;--surface:#161f30;--fg:#e7ecf4;--muted:#9aa6bb;--line:#2a364c;
+  --ink:#9fc0ee;--seal:#ff8a90;--seal-bg:#3d1c20;--ok:#6fd0a0;--ok-bg:#16352a;--amber:#e8b95a;--amber-bg:#3a2d12;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.6;padding-inline:16px}
+a{color:var(--ink)}
+:focus-visible{outline:2px solid var(--seal);outline-offset:2px}
+.wrap{max-width:1040px;margin-inline:auto}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;color:var(--ink);line-height:1.15}
+h1{font-size:clamp(1.9rem,5vw,3rem);font-weight:700}
+h2{font-size:clamp(1.4rem,3.2vw,1.9rem);font-weight:700}
+h3{font-size:1.05rem;font-weight:600}
+p{margin:0}
+.eyebrow{font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-block:16px;border-bottom:1px solid var(--line)}
+.brand{font-family:var(--display);font-weight:700;color:var(--ink);text-decoration:none}
+nav{display:flex;gap:14px;flex-wrap:wrap}
+nav a{text-decoration:none;color:var(--muted);font-size:.9rem}
+nav a:hover{color:var(--ink)}
+.btn{display:inline-block;padding:10px 18px;border-radius:6px;border:1px solid var(--ink);font-weight:600;text-decoration:none;font-size:.92rem}
+.btn.solid{background:var(--ink);color:var(--bg)}
+.btn.ghost{color:var(--ink)}
+.hero{display:flex;flex-direction:column;gap:18px;padding-block:56px 40px;max-width:760px}
+.hero .lead{color:var(--muted);font-size:1.05rem}
+.actions{display:flex;gap:12px;flex-wrap:wrap}
+.sim{background:var(--amber-bg);color:var(--amber);border-radius:6px;padding:8px 12px;font-size:.85rem;display:inline-block}
+section{padding-block:44px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:22px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.svc{display:flex;flex-direction:column;gap:6px;min-width:0}
+.svc p{color:var(--muted)}
+.cases{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:16px}
+.case{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.case header{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.rank{font-family:var(--mono);font-size:.74rem;color:var(--muted)}
+dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 12px}
+dt{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;padding-top:3px}
+dd{margin:0;min-width:0}
+.mock{border:1px dashed var(--line);border-radius:6px;padding:10px 12px;font-family:var(--mono);font-size:.78rem;display:flex;flex-direction:column;gap:6px;background:var(--bg)}
+.mock .tag{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.pill{padding:1px 8px;border-radius:99px;font-size:.72rem;font-weight:500}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.pill.warn{background:var(--amber-bg);color:var(--amber)}
+.pill.risk{background:var(--seal-bg);color:var(--seal)}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.stats div{border:1px solid var(--line);border-radius:6px;padding:6px 8px;background:var(--surface)}
+.stats b{display:block;font-size:1.1rem;color:var(--ink)}
+.more{color:var(--muted)}
+.real{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:.76rem;border:1px solid var(--line);border-radius:4px;padding:2px 8px;color:var(--muted)}
+.nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px}
+.nums div{border-top:2px solid var(--ink);padding-top:8px}
+.nums b{display:block;font-family:var(--display);font-size:2rem;color:var(--ink);line-height:1.1}
+.nums span{color:var(--muted);font-size:.9rem}
+ol.steps{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;counter-reset:s}
+ol.steps li{counter-increment:s;display:flex;flex-direction:column;gap:4px}
+ol.steps li::before{content:counter(s);font-family:var(--mono);color:var(--seal);font-weight:500}
+ol.steps p{color:var(--muted)}
+details{border-bottom:1px solid var(--line);padding-block:12px}
+summary{cursor:pointer;font-weight:600;color:var(--ink)}
+details p{color:var(--muted);margin-top:8px;max-width:70ch}
+.contact{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.ct{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;min-width:0}
+.ct span{min-width:0;overflow-wrap:anywhere}
+.ct small{display:block;color:var(--muted);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase}
+.copy{font:inherit;font-size:.8rem;cursor:pointer;background:transparent;border:1px solid var(--line);border-radius:4px;padding:4px 10px;color:var(--ink)}
+footer{padding-block:28px;color:var(--muted);font-size:.85rem;border-top:1px solid var(--line)}
+</style>
+<div class="wrap">
+  <header class="top" id="top">
+    <a class="brand" href="#top">Nguyễn Phan Minh Phú</a>
+    <nav aria-label="Điều hướng">
+      <a href="#dich-vu">Dịch vụ</a><a href="#du-an">Giải pháp</a><a href="#ket-qua">Kết quả</a><a href="#quy-trinh">Quy trình</a><a href="#faq">Câu hỏi</a>
+    </nav>
+    <a class="btn solid" href="#lien-he">Liên hệ tư vấn</a>
+  </header>
+
+  <div class="hero">
+    <span class="eyebrow">Website và hệ thống quản lý cho văn phòng luật</span>
+    <h1>Không lỡ hạn, không sót giờ làm, không để khách quên hẹn</h1>
+    <p class="lead">Mình là Nguyễn Phan Minh Phú, Senior Software Engineer tại TP.HCM. Mình thiết kế, lập trình và vận hành website, web app, mobile app, từ giao diện đến máy chủ.</p>
+    <div class="actions"><a class="btn solid" href="#lien-he">Liên hệ tư vấn</a><a class="btn ghost" href="#du-an">Xem giải pháp</a></div>
+    <p><span class="sim">Phần Giải pháp là mô phỏng với dữ liệu mẫu, không phải khách hàng thật.</span></p>
+  </div>
+
+  <section id="dich-vu">
+    <span class="eyebrow">Dịch vụ</span>
+    <h2>Mình có thể làm gì cho văn phòng của bạn</h2>
+    <div class="grid3">
+      <div class="svc"><h3>Website văn phòng luật</h3><p>Giới thiệu lĩnh vực hành nghề, đăng ký tư vấn, chuẩn SEO cơ bản, tự cập nhật nội dung.</p></div>
+      <div class="svc"><h3>Web app quản trị</h3><p>Quản lý vụ việc, lịch hẹn, giờ làm, phí dịch vụ. Phân quyền theo vai trò để đúng quyền hạn và quy trình.</p></div>
+      <div class="svc"><h3>Hệ thống phía sau</h3><p>API, tích hợp hệ thống có sẵn, triển khai Docker, giám sát và sao lưu để hệ thống chạy ổn định.</p></div>
+    </div>
+  </section>
+
+  <section id="du-an">
+    <span class="eyebrow">Giải pháp mô phỏng · văn phòng luật 5-15 người</span>
+    <h2>Sáu vấn đề văn phòng luật hay gặp, và cách hệ thống xử lý</h2>
+    <p class="more">Xếp theo mức rủi ro và tiền bị mất. Mọi tên, số liệu bên dưới là dữ liệu mẫu.</p>
+    <div class="cases">
+
+      <article class="case">
+        <header><h3>Hạn tố tụng</h3><span class="rank">ƯU TIÊN 1</span></header>
+        <dl>
+          <dt>Vấn đề</dt><dd>Mất hạn là mất quyền của khách, kèm trách nhiệm nghề nghiệp.</dd>
+          <dt>Luồng</dt><dd>Nhận vụ, nhập mốc, hệ thống nhắc nhiều tầng.</dd>
+          <dt>Giải pháp</dt><dd>Ba mốc nhắc: xa, gần, sát. Người thay thế tự nhận nhắc khi người chính nghỉ.</dd>
+        </dl>
+        <div class="mock" role="img" aria-label="Ví dụ màn hình nhắc hạn, số liệu mẫu">
+          <span class="tag">Số liệu mẫu</span>
+          <div class="row"><span>Vụ mẫu 01 · còn 14 ngày</span><span class="pill ok">Nhắc xa</span></div>
+          <div class="row"><span>Vụ mẫu 02 · còn 5 ngày</span><span class="pill warn">Nhắc gần</span></div>
+          <div class="row"><span>Vụ mẫu 03 · còn 1 ngày</span><span class="pill risk">Nhắc sát · người thay thế đã nhận</span></div>
+        </div>
+      </article>
+
+      <article class="case">
+        <header><h3>Timesheet đến hóa đơn</h3><span class="rank">ƯU TIÊN 2</span></header>
+        <dl>
+          <dt>Vấn đề</dt><dd>Giờ làm không ghi thì không thu được tiền.</dd>
+          <dt>Luồng</dt><dd>Ghi giờ theo vụ, duyệt, xuất hóa đơn.</dd>
+          <dt>Giải pháp</dt><dd>Nhắc cuối ngày, gắn cờ ngày thiếu giờ, hóa đơn sinh từ giờ đã duyệt.</dd>
+        </dl>
+        <div class="mock" role="img" aria-label="Ví dụ bảng giờ làm, số liệu mẫu">
+          <span class="tag">Số liệu mẫu</span>
+          <div class="row"><span>Luật sư mẫu A · 7,5 giờ</span><span class="pill ok">Đã duyệt</span></div>
+          <div class="row"><span>Trợ lý mẫu B · 0 giờ</span><span class="pill risk">Chưa ghi giờ</span></div>
+          <div class="row"><span>Hóa đơn mẫu · từ giờ đã duyệt</span><span class="pill warn">Chờ xuất</span></div>
+        </div>
+      </article>
+
+      <article class="case">
+        <header><h3>Nhắc lịch và báo khách</h3><span class="rank">ƯU TIÊN 3</span></header>
+        <dl>
+          <dt>Vấn đề</dt><dd>Khách quên hẹn hoặc không biết vụ đang đến đâu.</dd>
+          <dt>Luồng</dt><dd>Mốc nhắc, xác nhận, báo cáo tiến độ.</dd>
+          <dt>Giải pháp</dt><dd>Nhắc tự động. Khách báo không đến thì báo luật sư phụ trách. Báo cáo soạn từ ghi chú vụ việc.</dd>
+        </dl>
+        <div class="mock" role="img" aria-label="Ví dụ nhắc lịch hẹn, số liệu mẫu">
+          <span class="tag">Số liệu mẫu</span>
+          <div class="row"><span>Khách mẫu 1 · hẹn 09:00 mai</span><span class="pill ok">Đã xác nhận</span></div>
+          <div class="row"><span>Khách mẫu 2 · hẹn 14:00 mai</span><span class="pill risk">Báo không đến · đã báo luật sư</span></div>
+        </div>
+      </article>
+
+      <article class="case">
+        <header><h3>Kho mẫu văn bản</h3><span class="rank">ƯU TIÊN 4</span></header>
+        <dl>
+          <dt>Vấn đề</dt><dd>Dùng mẫu hợp đồng lỗi thời gây sai sót.</dd>
+          <dt>Luồng</dt><dd>Chọn mẫu, điền, in và ký bộ hồ sơ.</dd>
+          <dt>Giải pháp</dt><dd>Mỗi mẫu có phiên bản và ngày rà soát. Mẫu quá hạn bị chặn. Cảnh báo khi thiếu bộ hồ sơ in sẵn.</dd>
+        </dl>
+        <div class="mock" role="img" aria-label="Ví dụ kho mẫu văn bản, số liệu mẫu">
+          <span class="tag">Số liệu mẫu</span>
+          <div class="row"><span>Hợp đồng dịch vụ mẫu · v3</span><span class="pill ok">Đang dùng</span></div>
+          <div class="row"><span>Hợp đồng dịch vụ mẫu · v2</span><span class="pill risk">Quá hạn rà soát · bị chặn</span></div>
+        </div>
+      </article>
+
+      <article class="case">
+        <header><h3>Xếp lại lịch</h3><span class="rank">ƯU TIÊN 5</span></header>
+        <dl>
+          <dt>Vấn đề</dt><dd>Hẹn hoặc phiên bị dời gây trùng lịch luật sư và phòng họp.</dd>
+          <dt>Luồng</dt><dd>Dời lịch, hệ thống tìm khung giờ phù hợp.</dd>
+          <dt>Giải pháp</dt><dd>Gợi ý khung giờ trống của luật sư, phòng và khách, kèm thông báo tự động.</dd>
+        </dl>
+        <div class="mock" role="img" aria-label="Ví dụ gợi ý khung giờ, số liệu mẫu">
+          <span class="tag">Số liệu mẫu</span>
+          <div class="row"><span>Thứ Ba 14:00 · phòng họp 1</span><span class="pill ok">Cả ba bên trống</span></div>
+          <div class="row"><span>Thứ Tư 09:30 · phòng họp 2</span><span class="pill ok">Cả ba bên trống</span></div>
+        </div>
+      </article>
+
+      <article class="case">
+        <header><h3>Bảng điều khiển cho luật sư điều hành</h3><span class="rank">ƯU TIÊN 6</span></header>
+        <dl>
+          <dt>Vấn đề</dt><dd>Chủ văn phòng không thấy được tổng thể.</dd>
+          <dt>Luồng</dt><dd>Gom dữ liệu từ năm case trên.</dd>
+          <dt>Giải pháp</dt><dd>Một màn hình: hạn sắp tới, giờ chưa ghi, hóa đơn chờ, lịch trùng.</dd>
+        </dl>
+        <div class="mock" role="img" aria-label="Ví dụ bảng điều khiển, số liệu mẫu">
+          <span class="tag">Số liệu mẫu</span>
+          <div class="stats">
+            <div><b>3</b>Hạn sắp tới</div><div><b>2</b>Giờ chưa ghi</div>
+            <div><b>4</b>Hóa đơn chờ</div><div><b>1</b>Lịch trùng</div>
+          </div>
+        </div>
+      </article>
+    </div>
+    <p class="more">Mở rộng: kiểm tra xung đột lợi ích khi nhận vụ mới; nhắc công nợ phí dịch vụ.</p>
+
+    <div class="real">
+      <h3>Cùng cách làm, đã chạy thật trong giáo dục</h3>
+      <p><b>Góc Bình Yên</b> quản lý lớp học: xếp lịch, điểm danh, học phí, lương, báo cáo gửi phụ huynh, phân quyền 4 vai trò. <b>GBY Examina</b> tạo đề và làm bài thi trực tuyến, chấm tự động.</p>
+      <div class="chips"><span class="chip">Java 21</span><span class="chip">Spring Boot 3</span><span class="chip">Angular 18</span><span class="chip">MySQL 8</span><span class="chip">Docker</span><span class="chip">Nginx</span></div>
+    </div>
+  </section>
+
+  <section id="ket-qua">
+    <span class="eyebrow">Kết quả</span>
+    <h2>Kinh nghiệm vận hành hệ thống thật</h2>
+    <p class="more">Từ 10/2020, Senior Software Engineer tại Akensys, phụ trách backend, thiết bị IoT, ứng dụng di động và hạ tầng cho khách hàng công nghiệp tại Pháp.</p>
+    <div class="nums">
+      <div><b>6 năm</b><span>vận hành hệ thống production</span></div>
+      <div><b>11</b><span>khách hàng quốc tế</span></div>
+      <div><b>12</b><span>máy chủ VPS có giám sát</span></div>
+      <div><b>2</b><span>lần chuyển hệ thống production sang Java 21 / Spring Boot, người dùng cũ không bị ảnh hưởng</span></div>
+    </div>
+  </section>
+
+  <section id="quy-trinh">
+    <span class="eyebrow">Quy trình</span>
+    <h2>Bốn bước, báo cáo rõ ràng ở mỗi bước</h2>
+    <ol class="steps">
+      <li><h3>Tìm hiểu nhu cầu</h3><p>Trao đổi mục tiêu, người dùng và quy trình hiện tại. Chốt phạm vi, thời gian, báo giá.</p></li>
+      <li><h3>Thiết kế giao diện</h3><p>Dựng bản mẫu theo nhận diện của văn phòng để duyệt trước khi lập trình.</p></li>
+      <li><h3>Lập trình và kiểm thử</h3><p>Giao từng phần để dùng thử sớm và chỉnh theo phản hồi thực tế.</p></li>
+      <li><h3>Triển khai và bàn giao</h3><p>Đưa lên máy chủ, cấu hình sao lưu, giao tài liệu và hướng dẫn sử dụng.</p></li>
+    </ol>
+  </section>
+
+  <section id="faq">
+    <span class="eyebrow">Câu hỏi thường gặp</span>
+    <h2>Trước khi bắt đầu</h2>
+    <div>
+      <details><summary>Mình chưa có gì cả, bắt đầu từ đâu?</summary><p>Bạn kể về văn phòng và việc muốn hệ thống làm được. Mình đề xuất tính năng cần có và chia giai đoạn để bạn chọn làm phần quan trọng nhất trước.</p></details>
+      <details><summary>Dữ liệu vụ việc của khách có được bảo mật không?</summary><p>Hệ thống phân quyền theo vai trò, đăng nhập bằng JWT, truyền dữ liệu qua TLS và có sao lưu. Mình chỉ làm việc với cấu trúc dữ liệu khi cần và không đưa dữ liệu thật vào tài liệu giới thiệu.</p></details>
+      <details><summary>Đã có hệ thống đang chạy, có sửa tiếp được không?</summary><p>Được. Mình đã chuyển hai hệ thống production sang công nghệ mới mà người dùng cũ không bị ảnh hưởng. Mình sẽ đọc hệ thống hiện tại, đề xuất sửa hay làm lại và nói rõ lý do.</p></details>
+      <details><summary>Sau khi bàn giao, ai bảo trì?</summary><p>Mình bàn giao mã nguồn, tài liệu và hướng dẫn vận hành để bạn tự chủ. Nếu cần, mình tiếp tục hỗ trợ theo thỏa thuận riêng.</p></details>
+      <details><summary>Chi phí và thời gian thế nào?</summary><p>Phụ thuộc vào phạm vi. Sau các buổi trao đổi đầu tiên mình gửi báo giá và mốc thời gian cho từng giai đoạn.</p></details>
+    </div>
+  </section>
+
+  <section id="lien-he">
+    <span class="eyebrow">Liên hệ</span>
+    <h2>Đặt lịch trao đổi về hệ thống của văn phòng bạn</h2>
+    <div class="contact">
+      <div class="ct"><span><small>Email</small><span id="v-email">npmphu97@gmail.com</span></span><button class="copy" type="button" data-target="v-email">Sao chép</button></div>
+      <div class="ct"><span><small>Điện thoại / Zalo</small><span id="v-tel">0379 774 886</span></span><button class="copy" type="button" data-target="v-tel">Sao chép</button></div>
+      <div class="ct"><span><small>LinkedIn</small><a href="https://linkedin.com/in/npmphu97">linkedin.com/in/npmphu97</a></span></div>
+    </div>
+  </section>
+
+  <footer>© 2026 Nguyễn Phan Minh Phú · TP. Hồ Chí Minh, Việt Nam</footer>
+</div>
+<script>
+document.querySelectorAll('.copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    var el=document.getElementById(b.dataset.target);var t=el.textContent;
+    function sel(){var r=document.createRange();r.selectNodeContents(el);var s=getSelection();s.removeAllRanges();s.addRange(r);}
+    try{navigator.clipboard.writeText(t).then(function(){b.textContent='Đã chép'},function(){sel();b.textContent='Đã chọn'});}
+    catch(e){sel();b.textContent='Đã chọn';}
+    setTimeout(function(){b.textContent='Sao chép'},1800);
+  });
+});
+</script>
+
+</body></html>
