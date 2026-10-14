@@ -12,7 +12,10 @@ import csv
 import json
 import os
 import sys
+import secrets
 import threading
+import time
+from urllib.parse import parse_qs, urlparse
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -22,8 +25,11 @@ CSV_PATH = os.path.join(DATA, "responses.csv")
 API = "/api/khao-sat"
 COLS = ["sid", "cap_nhat", "trang_thai", "buoc", "ho_ten", "cong_ty", "sdt", "email",
         "linh_vuc", "muc_tieu", "ngan_sach", "goi_de_xuat", "tong_thap", "tong_cao",
-        "van_hanh", "phan_loai", "canh_bao", "answers_json"]
+        "van_hanh", "phan_loai", "canh_bao", "answers_json", "email_xac_minh"]
 lock = threading.Lock()
+# OTP và phiên chỉ giữ trong bộ nhớ. Chạy cục bộ không gửi mail: mã in ra cửa sổ chạy server.
+OTP = {}     # sid -> {"code", "email", "exp", "tries"}
+TOKENS = {}  # token -> {"sid", "email", "exp"}
 
 
 def load():
@@ -49,14 +55,45 @@ def atomic_write(path, write):
     os.replace(tmp, path)
 
 
+def norm_phone(s):
+    d = "".join(c for c in str(s or "") if c.isdigit() or c == "+")
+    if d.startswith("+84"):
+        d = "0" + d[3:]
+    elif d.startswith("84"):
+        d = "0" + d[2:]
+    return "".join(c for c in d if c.isdigit())[:20]
+
+
+def norm_email(s):
+    return str(s or "").strip().lower()
+
+
+def expected_email(r):
+    return norm_email(r.get("email_xac_minh") or r.get("email"))
+
+
+def find(rows, sid):
+    for i, r in enumerate(rows):
+        if norm_phone(r.get("sid")) == sid:
+            return i
+    return -1
+
+
 def save(rec):
+    """Trả về False nếu email xác minh không khớp (không ghi đè phiếu của người khác)."""
     with lock:
         os.makedirs(DATA, exist_ok=True)
         rows = load()
-        for i, r in enumerate(rows):
-            if r.get("sid") == rec["sid"]:
-                rows[i] = rec
-                break
+        tok = TOKENS.get(str(rec.pop("token", "")))
+        if not tok or tok["exp"] < time.time() or tok["sid"] != rec["sid"]:
+            return False
+        vem = tok["email"]
+        i = find(rows, rec["sid"])
+        if i >= 0 and expected_email(rows[i]) != vem:
+            return False
+        rec["email_xac_minh"] = vem
+        if i >= 0:
+            rows[i] = rec
         else:
             rows.append(rec)
 
@@ -74,6 +111,40 @@ def save(rec):
 
         atomic_write(JSON_PATH, w_json)
         atomic_write(CSV_PATH, w_csv)
+        return True
+
+
+def otp_send(sid, email):
+    with lock:
+        rows = load()
+        i = find(rows, sid)
+        if i >= 0 and expected_email(rows[i]) != email:
+            return {"status": "sent"}  # không tiết lộ số đã có phiếu
+        code = "%06d" % secrets.randbelow(1000000)
+        OTP[sid] = {"code": code, "email": email, "exp": time.time() + 600, "tries": 0}
+    sys.stderr.write("[OTP] %s -> %s : %s\n" % (sid, email, code))
+    return {"status": "sent"}
+
+
+def otp_verify(sid, email, code):
+    with lock:
+        o = OTP.get(sid)
+        if not o or o["exp"] < time.time() or o["email"] != email or o["tries"] >= 5:
+            OTP.pop(sid, None)
+            return {"status": "bad"}
+        if o["code"] != code:
+            o["tries"] += 1
+            return {"status": "bad"}
+        OTP.pop(sid, None)
+        tok = secrets.token_hex(16)
+        TOKENS[tok] = {"sid": sid, "email": email, "exp": time.time() + 24 * 3600}
+        rows = load()
+    i = find(rows, sid)
+    if i < 0:
+        return {"status": "new", "token": tok}
+    r = rows[i]
+    return {"status": "ok", "token": tok, "trang_thai": r.get("trang_thai", ""),
+            "buoc": r.get("buoc", ""), "answers": r.get("answers", {})}
 
 
 class Handler(SimpleHTTPRequestHandler):
@@ -91,8 +162,11 @@ class Handler(SimpleHTTPRequestHandler):
             rec = json.loads(self.rfile.read(n).decode("utf-8"))
             if not isinstance(rec, dict) or not str(rec.get("sid", "")).strip():
                 raise ValueError("thiếu sid")
-            rec["sid"] = str(rec["sid"])[:64]
-            save(rec)
+            rec["sid"] = norm_phone(rec["sid"])
+            if not rec["sid"]:
+                raise ValueError("thiếu sid")
+            if not save(rec):
+                raise ValueError("sai xác minh")
         except (ValueError, OSError) as e:
             self.send_response(400)
             self.end_headers()
@@ -102,6 +176,27 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        u = urlparse(self.path)
+        if u.path == API:
+            q = parse_qs(u.query)
+            sid = norm_phone(q.get("sid", [""])[0])
+            email = norm_email(q.get("email", [""])[0])
+            act = q.get("action", [""])[0]
+            if not sid or "@" not in email:
+                out = {"status": "error"}
+            elif act == "otp":
+                out = otp_send(sid, email)
+            elif act == "verify":
+                out = otp_verify(sid, email, "".join(c for c in q.get("code", [""])[0] if c.isdigit()))
+            else:
+                out = {"status": "error"}
+            body = json.dumps(out, ensure_ascii=False).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         # không phục vụ thư mục dữ liệu khách ra web, kể cả cục bộ
         if self.path.split("?")[0].startswith("/khao-sat-data"):
             self.send_error(404)
