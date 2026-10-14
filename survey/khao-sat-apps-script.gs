@@ -1,6 +1,8 @@
 /**
  * Nhận câu trả lời khảo sát từ trang khao-sat-nhu-cau.html và ghi vào Google Sheet.
- * Mỗi khách một dòng (theo cột sid), cập nhật liên tục khi khách trả lời tiếp.
+ * Mỗi khách một dòng, khóa là SỐ ĐIỆN THOẠI (cột sid), cập nhật liên tục khi khách trả lời tiếp.
+ * Khách quay lại (kể cả thiết bị khác) nhập số điện thoại + email đã dùng lúc đầu thì được nạp lại
+ * phiếu làm dở (doGet). Email không khớp thì không trả dữ liệu và không cho ghi đè.
  *
  * CÁCH CÀI (khoảng 5 phút):
  * 1. Tạo Google Sheet mới (đặt tên tùy ý) > Tiện ích mở rộng > Apps Script.
@@ -24,38 +26,109 @@ var SHEET_NAME = 'KhaoSat';
 var NOTIFY_EMAIL = 'npmphu97@gmail.com';
 var COLS = ['sid', 'cap_nhat', 'trang_thai', 'buoc', 'ho_ten', 'cong_ty', 'sdt', 'email',
   'linh_vuc', 'muc_tieu', 'ngan_sach', 'goi_de_xuat', 'tong_thap', 'tong_cao',
-  'van_hanh', 'phan_loai', 'canh_bao', 'answers_json'];
+  'van_hanh', 'phan_loai', 'canh_bao', 'answers_json', 'email_xac_minh'];
+
+/** Chuẩn hóa số điện thoại: chỉ giữ chữ số, đổi +84/84 đầu thành 0. */
+function normPhone(s) {
+  var d = String(s || '').replace(/[^\d+]/g, '').replace(/^\+?84/, '0');
+  return d.replace(/\D/g, '').slice(0, 20);
+}
+
+function normEmail(s) {
+  return String(s || '').trim().toLowerCase();
+}
+
+function col(name) {
+  return COLS.indexOf(name);
+}
+
+function getSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
+  if (sh.getLastRow() === 0) {
+    sh.appendRow(COLS);
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+
+/** Trả về số dòng (1-based) của sid, hoặc 0 nếu chưa có. */
+function findRow(sh, sid) {
+  var last = sh.getLastRow();
+  if (last < 2) return 0;
+  var ids = sh.getRange(2, 1, last - 1, 1).getValues();
+  for (var i = 0; i < ids.length; i++) {
+    if (normPhone(ids[i][0]) === sid) return i + 2;
+  }
+  return 0;
+}
+
+/** Email dùng để xác minh của một dòng (dòng cũ chưa có cột xác minh thì dùng cột email). */
+function expectedEmail(rowVals) {
+  return normEmail(rowVals[col('email_xac_minh')] || rowVals[col('email')]);
+}
+
+/** Nạp lại phiếu làm dở: GET ?sid=<sđt>&email=<email xác minh> */
+function doGet(e) {
+  try {
+    var p = (e && e.parameter) || {};
+    var sid = normPhone(p.sid);
+    var email = normEmail(p.email);
+    if (!sid) return json({ status: 'error' });
+    var sh = getSheet();
+    var at = findRow(sh, sid);
+    if (!at) return json({ status: 'new' });
+    var vals = sh.getRange(at, 1, 1, COLS.length).getValues()[0];
+    var expected = expectedEmail(vals);
+    if (!email || !expected || email !== expected) return json({ status: 'mismatch' });
+    var answers = {};
+    try { answers = JSON.parse(vals[col('answers_json')] || '{}'); } catch (err) {}
+    return json({
+      status: 'ok',
+      trang_thai: String(vals[col('trang_thai')]),
+      buoc: String(vals[col('buoc')]),
+      answers: answers
+    });
+  } catch (err) {
+    return json({ status: 'error' });
+  }
+}
 
 function doPost(e) {
   var lock = LockService.getScriptLock();
   lock.waitLock(15000);
   try {
     var rec = JSON.parse(e.postData.contents);
-    var sid = String(rec.sid || '').slice(0, 64);
+    var sid = normPhone(rec.sid);
     if (!sid) return out('thieu sid');
+    var vem = normEmail(rec.vemail);
 
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sh = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
-    if (sh.getLastRow() === 0) {
-      sh.appendRow(COLS);
-      sh.setFrozenRows(1);
+    var sh = getSheet();
+    var last = sh.getLastRow();
+    var at = findRow(sh, sid);
+    var wasDone = false;
+    var verified = vem;
+    if (at) {
+      var old = sh.getRange(at, 1, 1, COLS.length).getValues()[0];
+      var expected = expectedEmail(old);
+      if (expected && expected !== vem) return out('sai xac minh');
+      if (!expected && !vem) return out('thieu xac minh');
+      verified = expected || vem;
+      wasDone = String(old[col('trang_thai')]) === 'hoan_thanh';
+    } else {
+      if (!vem) return out('thieu xac minh');
+      at = last + 1;
     }
 
     var row = COLS.map(function (c) {
+      if (c === 'sid') return sid;
       if (c === 'answers_json') return JSON.stringify(rec.answers || {});
+      if (c === 'email_xac_minh') return verified;
       var v = rec[c];
       if (Array.isArray(v)) v = v.join('; ');
       return v == null ? '' : v;
     });
 
-    var last = sh.getLastRow();
-    var ids = last > 1 ? sh.getRange(2, 1, last - 1, 1).getValues() : [];
-    var at = 0;
-    for (var i = 0; i < ids.length; i++) {
-      if (String(ids[i][0]) === sid) { at = i + 2; break; }
-    }
-    if (!at) at = last + 1;
-    var wasDone = at <= last && String(sh.getRange(at, 3).getValue()) === 'hoan_thanh';
     var rng = sh.getRange(at, 1, 1, COLS.length);
     rng.setNumberFormat('@'); // giữ nguyên số 0 đầu của số điện thoại
     rng.setValues([row]);
@@ -70,6 +143,10 @@ function doPost(e) {
 
 function out(s) {
   return ContentService.createTextOutput(s);
+}
+
+function json(o) {
+  return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
 }
 
 /** Gửi email tóm tắt cho chủ sheet. Chỉ gửi một lần cho mỗi khách (lần đầu hoàn thành). */

@@ -468,8 +468,12 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify({ans:ans,cur:cur}))}
 function newSid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
 var sid=(function(){try{var x=localStorage.getItem(KEY+'_sid');if(!x){x=newSid();localStorage.setItem(KEY+'_sid',x)}return x}catch(e){return newSid()}})();
 var pushTimer=null;
+/* Khi có ENDPOINT: khách nhập số điện thoại + email trước; sđt (đã chuẩn hóa) là sid trên mọi thiết bị,
+   email dùng để xác minh khi nạp lại phiếu làm dở. */
+var unlocked=!ENDPOINT, vemail='';
+function normPhone(s){return String(s||'').replace(/[^\d+]/g,'').replace(/^\+?84/,'0').replace(/\D/g,'').slice(0,20)}
 function record(status){
-  var vs=visibleSteps(), rec={sid:sid,cap_nhat:new Date().toISOString(),trang_thai:status,
+  var vs=visibleSteps(), rec={sid:sid,vemail:vemail,cap_nhat:new Date().toISOString(),trang_thai:status,
     buoc:(done?vs.length:cur+1)+'/'+vs.length,ho_ten:ans.ho_ten||'',cong_ty:ans.cong_ty||'',sdt:ans.sdt||'',email:ans.email||'',
     linh_vuc:ans.linh_vuc?labelOf('linh_vuc',ans.linh_vuc,ans):'',
     muc_tieu:(ans.muc_tieu||[]).map(function(x){return labelOf('muc_tieu',x,ans)}),
@@ -483,12 +487,12 @@ function record(status){
 }
 function push(status){
   clearTimeout(pushTimer);
-  if(!ENDPOINT||!(ans.ho_ten||ans.sdt))return; // chưa có thông tin liên hệ thì chưa lưu
+  if(!ENDPOINT||!unlocked||!(ans.ho_ten||ans.sdt))return; // chưa qua bước nhập sđt/email thì chưa lưu
   try{fetch(ENDPOINT,{method:'POST',mode:ENDPOINT.charAt(0)==='/'?'same-origin':'no-cors',keepalive:true,
     headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(record(status))}).catch(function(){})}catch(e){}
 }
 function schedulePush(){
-  if(!ENDPOINT)return;
+  if(!ENDPOINT||!unlocked)return;
   clearTimeout(pushTimer);
   pushTimer=setTimeout(function(){push(done?'hoan_thanh':'dang_dien')},1500);
 }
@@ -524,7 +528,7 @@ function renderQ(q){
   }else{
     h+='<label class="t" for="f_'+q.id+'">'+lab+'</label>'+(hh?'<span class="h">'+esc(hh)+'</span>':'');
     if(q.type==='textarea')h+='<textarea id="f_'+q.id+'" name="'+q.id+'">'+esc(v||'')+'</textarea>';
-    else h+='<input id="f_'+q.id+'" name="'+q.id+'" type="'+q.type+'" value="'+esc(v||'')+'"'+(q.type==='tel'?' inputmode="tel"':'')+'>';
+    else h+='<input id="f_'+q.id+'" name="'+q.id+'" type="'+q.type+'" value="'+esc(v||'')+'"'+(q.type==='tel'?' inputmode="tel"':'')+(q.id==='sdt'&&ENDPOINT?' readonly':'')+'>';
   }
   return h+'<div class="err">Vui lòng trả lời câu này.</div></div>';
 }
@@ -571,6 +575,7 @@ function validStep(){
   return ok;
 }
 $('form').addEventListener('change',function(e){
+  if(!unlocked)return;
   [].forEach.call($('form').querySelectorAll('.opt'),function(l){var i=l.querySelector('input');l.classList.toggle('on',!!(i&&i.checked))});
   readStep();save();
   // các câu có điều kiện trong cùng bước: vẽ lại để hiện/ẩn
@@ -578,17 +583,58 @@ $('form').addEventListener('change',function(e){
   if(n!==shown){var y=scrollY;renderForm();scrollTo(0,y);}
 });
 $('form').addEventListener('submit',function(e){
-  e.preventDefault();readStep();
+  e.preventDefault();
+  if(!unlocked){unlock();return;}
+  readStep();
   if(!validStep())return;
   save();
   if(cur<visibleSteps().length-1){cur++;save();go();}else{done=true;go();}
 });
 $('steps').addEventListener('click',function(e){
+  if(!unlocked)return;
   var li=e.target.closest('li');if(!li)return;
   if(li.dataset.i==='res')return;
   var i=+li.dataset.i; if(i<=cur||done){if(!done)readStep();done=false;cur=i;save();go();}
 });
+function renderGate(msg){
+  $('steps').innerHTML='';$('bar').style.width='0';$('result').innerHTML='';
+  $('form').style.display='';
+  $('form').innerHTML='<div class="card"><p class="mono">Bắt đầu</p><h2>Nhập thông tin để bắt đầu</h2>'+
+    '<p class="sub">Số điện thoại dùng để lưu phiếu và mở lại trên mọi thiết bị. Email dùng để xác minh khi bạn quay lại làm tiếp.</p>'+
+    '<div class="q" id="g_pq"><label class="t" for="g_phone">Số điện thoại / Zalo <span class="req">*</span></label>'+
+    '<input id="g_phone" type="tel" inputmode="tel" autocomplete="tel" value="'+esc(ans.sdt||'')+'"><div class="err">Số điện thoại chưa hợp lệ.</div></div>'+
+    '<div class="q" id="g_eq"><label class="t" for="g_email">Email <span class="req">*</span></label>'+
+    '<span class="h">Dùng đúng email này mỗi lần quay lại để mở phiếu làm dở.</span>'+
+    '<input id="g_email" type="email" autocomplete="email" value="'+esc(ans.email||'')+'"><div class="err">Email chưa hợp lệ.</div></div>'+
+    '<div class="err" id="g_msg" style="'+(msg?'display:block':'')+'">'+esc(msg||'')+'</div></div>'+
+    '<div class="nav"><span></span><button type="submit" class="btn" id="g_go">Tiếp tục →</button></div>';
+}
+function unlock(){
+  var phone=normPhone($('g_phone').value), email=$('g_email').value.trim().toLowerCase();
+  var okP=/^\d{8,15}$/.test(phone), okE=/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+  $('g_pq').classList.toggle('bad',!okP);$('g_eq').classList.toggle('bad',!okE);
+  if(!okP||!okE)return;
+  var btn=$('g_go'),msg=$('g_msg');btn.disabled=true;btn.textContent='Đang kiểm tra...';msg.style.display='none';
+  function fail(t){renderGate(t);$('g_phone').value=phone;$('g_email').value=email}
+  fetch(ENDPOINT+(ENDPOINT.indexOf('?')<0?'?':'&')+'sid='+encodeURIComponent(phone)+'&email='+encodeURIComponent(email))
+    .then(function(r){return r.json()})
+    .then(function(r){
+      if(r.status==='mismatch')return fail('Số điện thoại này đã có phiếu với email khác. Hãy nhập đúng email đã dùng lần đầu, hoặc nhắn Zalo '+CONTACT.zalo+' để được hỗ trợ.');
+      if(r.status!=='ok'&&r.status!=='new')return fail('Chưa kiểm tra được, vui lòng thử lại sau ít phút.');
+      var sameLocal=normPhone(ans.sdt)===phone;
+      if(r.status==='ok'){
+        ans=r.answers||{};var m=/^(\d+)\//.exec(r.buoc||'');
+        cur=m?Math.max(0,+m[1]-1):0;done=r.trang_thai==='hoan_thanh';
+      }else if(!sameLocal){ans={};cur=0;done=false;}
+      ans.sdt=phone;if(!ans.email)ans.email=email;
+      sid=phone;vemail=email;unlocked=true;
+      try{localStorage.setItem(KEY+'_sid',sid)}catch(e){}
+      save();go();
+    })
+    .catch(function(){fail('Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.')});
+}
 function go(){
+  if(!unlocked){renderGate();return;}
   if(done){$('form').style.display='none';renderSteps();renderResult();push('hoan_thanh');}
   else renderForm();
   scrollTo({top:0,behavior:'smooth'});
@@ -803,7 +849,7 @@ function renderResult(a0){
     $('copy').onclick=function(){copy(txt)};
     $('dl').onclick=function(){var b=new Blob([txt],{type:'text/plain;charset=utf-8'}),u=URL.createObjectURL(b),l=document.createElement('a');l.href=u;l.download='khao-sat-'+((a.cong_ty||'khach').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/[^a-z0-9]+/g,'-'))+'.txt';l.click();URL.revokeObjectURL(u);};
     $('edit').onclick=function(){done=false;cur=0;go()};
-    $('reset').onclick=function(){if(!confirm('Xóa toàn bộ câu trả lời để làm phiếu mới?'))return;ans={};cur=0;done=false;try{localStorage.removeItem(KEY);localStorage.removeItem(KEY+'_sid')}catch(e){}sid=newSid();try{localStorage.setItem(KEY+'_sid',sid)}catch(e){}go()};
+    $('reset').onclick=function(){if(!confirm('Xóa toàn bộ câu trả lời để làm phiếu mới? (Phiếu cũ của số này sẽ bị thay thế)'))return;var keepP=ans.sdt,keepE=ans.email;ans={};cur=0;done=false;try{localStorage.removeItem(KEY)}catch(e){}if(ENDPOINT){ans.sdt=keepP;ans.email=keepE;}else{try{localStorage.removeItem(KEY+'_sid')}catch(e){}sid=newSid();try{localStorage.setItem(KEY+'_sid',sid)}catch(e){}}save();go()};
   }
   bindImport();
 }

@@ -3,6 +3,17 @@
 Trang `khao-sat-nhu-cau.html` gửi câu trả lời của khách tới một **Google Apps Script**.
 Script ghi vào **Google Sheet** (mỗi khách một dòng) và **gửi email tóm tắt** cho bạn khi khách hoàn thành phiếu.
 
+## Khách vào làm và quay lại thế nào
+
+1. Màn hình đầu tiên yêu cầu khách nhập **số điện thoại** và **email**.
+2. Số điện thoại (đã chuẩn hóa: `+84 912…`, `84912…` và `0912…` là cùng một số) là mã khách (`sid`) trên mọi thiết bị.
+3. Khách quay lại, ở thiết bị nào cũng được, nhập lại đúng **số điện thoại + email đã dùng lần đầu** thì phiếu làm dở được nạp lại và làm tiếp đúng bước cũ.
+4. Số đã có phiếu mà email không khớp thì không nạp được và không ghi đè được. Khách nhắn Zalo cho bạn để được hỗ trợ.
+5. Email dùng để xác minh được lưu ở cột `email_xac_minh`. Hệ thống **không gửi** email xác minh nào cho khách.
+6. Mỗi số điện thoại chỉ có một dòng. Nút "Làm phiếu mới" xóa câu trả lời và ghi đè đúng dòng đó.
+
+Lưu ý bảo mật: cách này ngăn người lạ chỉ biết số điện thoại mà xem hay ghi đè phiếu. Ai biết cả số điện thoại lẫn email của khách thì vẫn mở được phiếu. Nếu cần chặt hơn, dùng mã OTP gửi qua email.
+
 Chi phí 0đ. Hạn mức gói miễn phí khoảng 100 email/ngày.
 
 ## Cài đặt (khoảng 5 phút)
@@ -11,7 +22,8 @@ Chi phí 0đ. Hạn mức gói miễn phí khoảng 100 email/ngày.
 1. Vào <https://sheets.new> để tạo Google Sheet mới (đặt tên tùy ý, ví dụ `Khảo sát khách hàng`).
 2. Chọn **Tiện ích mở rộng > Apps Script**.
 3. Xóa code mẫu, dán toàn bộ nội dung file [`khao-sat-apps-script.gs`](khao-sat-apps-script.gs), bấm **Lưu**.
-4. (Tùy chọn) Sửa dòng `var NOTIFY_EMAIL = '...'` thành email muốn nhận thông báo.
+4. Nếu Sheet đã có dữ liệu thử từ phiên bản cũ, xóa sheet `KhaoSat` cũ để script tạo lại với cột `email_xac_minh` mới.
+5. (Tùy chọn) Sửa dòng `var NOTIFY_EMAIL = '...'` thành email muốn nhận thông báo.
    Để `''` nếu chỉ muốn lưu vào Sheet, không gửi mail.
 
 ### 2. Triển khai thành ứng dụng web
@@ -41,7 +53,8 @@ var REMOTE_ENDPOINT = 'https://script.google.com/macros/s/XXXXXXXX/exec';
 Commit và push lên GitHub, GitHub Pages sẽ tự cập nhật sau ít phút.
 
 ### 4. Kiểm tra
-1. Mở trang khảo sát trên web, điền họ tên hoặc số điện thoại rồi làm đến hết.
+1. Mở trang khảo sát trên web, nhập số điện thoại và email ở màn hình đầu, rồi làm đến hết.
+   Mở lại trang bằng trình duyệt ẩn danh hoặc thiết bị khác, nhập lại đúng số và email để kiểm tra việc nạp lại phiếu.
 2. Vào Google Sheet: sẽ có sheet `KhaoSat` với một dòng mới.
 3. Kiểm tra hộp thư (cả mục Spam): có email tóm tắt khi bấm **Xem gợi ý**.
 
@@ -60,7 +73,7 @@ Nếu chỉ bấm Lưu, bản đang chạy vẫn là code cũ. URL giữ nguyên
 | Sheet không có dữ liệu | Kiểm tra `REMOTE_ENDPOINT` đã dán đúng và đã push; kiểm tra quyền truy cập là **Bất kỳ ai** |
 | Có dữ liệu nhưng không có mail | Chưa cấp quyền gửi email (triển khai lại và cấp quyền); xem mục Spam; kiểm tra `NOTIFY_EMAIL` |
 | Sửa script mà không đổi gì | Chưa tạo **Phiên bản mới** khi triển khai |
-| Không có dữ liệu dù khách đã điền | Trang chỉ lưu khi khách đã nhập họ tên hoặc số điện thoại |
+| Khách báo không mở lại được phiếu | Email nhập khác với email lần đầu: xem cột `email_xac_minh` của số đó trong Sheet |
 
 ## Chạy thử trên máy (không cần Google)
 ```bash
@@ -71,3 +84,4 @@ Mở <http://localhost:8000/khao-sat-nhu-cau.html>. Kết quả lưu vào `surve
 ## Quyền riêng tư
 Khi đã cấu hình `REMOTE_ENDPOINT`, trang tự hiển thị thông báo quyền riêng tư cho khách.
 Dữ liệu chứa thông tin cá nhân (họ tên, số điện thoại, email), nên đừng chia sẻ công khai Google Sheet.
+Muốn thêm thông báo xóa dữ liệu, khách nhắn Zalo cho bạn (đã có sẵn trong dòng thông báo của trang).

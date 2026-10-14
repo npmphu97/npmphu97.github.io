@@ -13,6 +13,7 @@ import json
 import os
 import sys
 import threading
+from urllib.parse import parse_qs, urlparse
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -22,7 +23,7 @@ CSV_PATH = os.path.join(DATA, "responses.csv")
 API = "/api/khao-sat"
 COLS = ["sid", "cap_nhat", "trang_thai", "buoc", "ho_ten", "cong_ty", "sdt", "email",
         "linh_vuc", "muc_tieu", "ngan_sach", "goi_de_xuat", "tong_thap", "tong_cao",
-        "van_hanh", "phan_loai", "canh_bao", "answers_json"]
+        "van_hanh", "phan_loai", "canh_bao", "answers_json", "email_xac_minh"]
 lock = threading.Lock()
 
 
@@ -49,14 +50,43 @@ def atomic_write(path, write):
     os.replace(tmp, path)
 
 
+def norm_phone(s):
+    d = "".join(c for c in str(s or "") if c.isdigit() or c == "+")
+    if d.startswith("+84"):
+        d = "0" + d[3:]
+    elif d.startswith("84"):
+        d = "0" + d[2:]
+    return "".join(c for c in d if c.isdigit())[:20]
+
+
+def norm_email(s):
+    return str(s or "").strip().lower()
+
+
+def expected_email(r):
+    return norm_email(r.get("email_xac_minh") or r.get("email"))
+
+
+def find(rows, sid):
+    for i, r in enumerate(rows):
+        if norm_phone(r.get("sid")) == sid:
+            return i
+    return -1
+
+
 def save(rec):
+    """Trả về False nếu email xác minh không khớp (không ghi đè phiếu của người khác)."""
     with lock:
         os.makedirs(DATA, exist_ok=True)
         rows = load()
-        for i, r in enumerate(rows):
-            if r.get("sid") == rec["sid"]:
-                rows[i] = rec
-                break
+        vem = norm_email(rec.pop("vemail", ""))
+        i = find(rows, rec["sid"])
+        expected = expected_email(rows[i]) if i >= 0 else ""
+        if (expected and expected != vem) or (not expected and not vem):
+            return False
+        rec["email_xac_minh"] = expected or vem
+        if i >= 0:
+            rows[i] = rec
         else:
             rows.append(rec)
 
@@ -74,6 +104,21 @@ def save(rec):
 
         atomic_write(JSON_PATH, w_json)
         atomic_write(CSV_PATH, w_csv)
+        return True
+
+
+def lookup(sid, email):
+    with lock:
+        rows = load()
+    i = find(rows, sid)
+    if i < 0:
+        return {"status": "new"}
+    r = rows[i]
+    exp = expected_email(r)
+    if not email or not exp or email != exp:
+        return {"status": "mismatch"}
+    return {"status": "ok", "trang_thai": r.get("trang_thai", ""), "buoc": r.get("buoc", ""),
+            "answers": r.get("answers", {})}
 
 
 class Handler(SimpleHTTPRequestHandler):
@@ -91,8 +136,11 @@ class Handler(SimpleHTTPRequestHandler):
             rec = json.loads(self.rfile.read(n).decode("utf-8"))
             if not isinstance(rec, dict) or not str(rec.get("sid", "")).strip():
                 raise ValueError("thiếu sid")
-            rec["sid"] = str(rec["sid"])[:64]
-            save(rec)
+            rec["sid"] = norm_phone(rec["sid"])
+            if not rec["sid"]:
+                raise ValueError("thiếu sid")
+            if not save(rec):
+                raise ValueError("sai xác minh")
         except (ValueError, OSError) as e:
             self.send_response(400)
             self.end_headers()
@@ -102,6 +150,17 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        u = urlparse(self.path)
+        if u.path == API:
+            q = parse_qs(u.query)
+            out = lookup(norm_phone(q.get("sid", [""])[0]), norm_email(q.get("email", [""])[0]))
+            body = json.dumps(out, ensure_ascii=False).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         # không phục vụ thư mục dữ liệu khách ra web, kể cả cục bộ
         if self.path.split("?")[0].startswith("/khao-sat-data"):
             self.send_error(404)
