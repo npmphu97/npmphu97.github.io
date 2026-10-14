@@ -25,11 +25,11 @@ CSV_PATH = os.path.join(DATA, "responses.csv")
 API = "/api/khao-sat"
 COLS = ["sid", "cap_nhat", "trang_thai", "buoc", "ho_ten", "cong_ty", "sdt", "email",
         "linh_vuc", "muc_tieu", "ngan_sach", "goi_de_xuat", "tong_thap", "tong_cao",
-        "van_hanh", "phan_loai", "canh_bao", "answers_json", "email_xac_minh"]
+        "van_hanh", "phan_loai", "canh_bao", "answers_json"]
 lock = threading.Lock()
 # OTP và phiên chỉ giữ trong bộ nhớ. Chạy cục bộ không gửi mail: mã in ra cửa sổ chạy server.
-OTP = {}     # sid -> {"code", "email", "exp", "tries"}
-TOKENS = {}  # token -> {"sid", "email", "exp"}
+OTP = {}     # sid (email) -> {"code", "exp", "tries"}
+TOKENS = {}  # token -> {"sid", "exp"}
 
 
 def load():
@@ -55,43 +55,26 @@ def atomic_write(path, write):
     os.replace(tmp, path)
 
 
-def norm_phone(s):
-    d = "".join(c for c in str(s or "") if c.isdigit() or c == "+")
-    if d.startswith("+84"):
-        d = "0" + d[3:]
-    elif d.startswith("84"):
-        d = "0" + d[2:]
-    return "".join(c for c in d if c.isdigit())[:20]
-
-
 def norm_email(s):
     return str(s or "").strip().lower()
 
 
-def expected_email(r):
-    return norm_email(r.get("email_xac_minh") or r.get("email"))
-
-
 def find(rows, sid):
     for i, r in enumerate(rows):
-        if norm_phone(r.get("sid")) == sid:
+        if norm_email(r.get("sid")) == sid:
             return i
     return -1
 
 
 def save(rec):
-    """Trả về False nếu email xác minh không khớp (không ghi đè phiếu của người khác)."""
+    """Trả về False nếu chưa xác minh email (token không khớp sid)."""
     with lock:
         os.makedirs(DATA, exist_ok=True)
         rows = load()
         tok = TOKENS.get(str(rec.pop("token", "")))
         if not tok or tok["exp"] < time.time() or tok["sid"] != rec["sid"]:
             return False
-        vem = tok["email"]
         i = find(rows, rec["sid"])
-        if i >= 0 and expected_email(rows[i]) != vem:
-            return False
-        rec["email_xac_minh"] = vem
         if i >= 0:
             rows[i] = rec
         else:
@@ -114,22 +97,18 @@ def save(rec):
         return True
 
 
-def otp_send(sid, email):
+def otp_send(sid):
     with lock:
-        rows = load()
-        i = find(rows, sid)
-        if i >= 0 and expected_email(rows[i]) != email:
-            return {"status": "sent"}  # không tiết lộ số đã có phiếu
         code = "%06d" % secrets.randbelow(1000000)
-        OTP[sid] = {"code": code, "email": email, "exp": time.time() + 600, "tries": 0}
-    sys.stderr.write("[OTP] %s -> %s : %s\n" % (sid, email, code))
+        OTP[sid] = {"code": code, "exp": time.time() + 600, "tries": 0}
+    sys.stderr.write("[OTP] %s : %s\n" % (sid, code))
     return {"status": "sent"}
 
 
-def otp_verify(sid, email, code):
+def otp_verify(sid, code):
     with lock:
         o = OTP.get(sid)
-        if not o or o["exp"] < time.time() or o["email"] != email or o["tries"] >= 5:
+        if not o or o["exp"] < time.time() or o["tries"] >= 5:
             OTP.pop(sid, None)
             return {"status": "bad"}
         if o["code"] != code:
@@ -137,7 +116,7 @@ def otp_verify(sid, email, code):
             return {"status": "bad"}
         OTP.pop(sid, None)
         tok = secrets.token_hex(16)
-        TOKENS[tok] = {"sid": sid, "email": email, "exp": time.time() + 24 * 3600}
+        TOKENS[tok] = {"sid": sid, "exp": time.time() + 24 * 3600}
         rows = load()
     i = find(rows, sid)
     if i < 0:
@@ -162,7 +141,7 @@ class Handler(SimpleHTTPRequestHandler):
             rec = json.loads(self.rfile.read(n).decode("utf-8"))
             if not isinstance(rec, dict) or not str(rec.get("sid", "")).strip():
                 raise ValueError("thiếu sid")
-            rec["sid"] = norm_phone(rec["sid"])
+            rec["sid"] = norm_email(rec["sid"])
             if not rec["sid"]:
                 raise ValueError("thiếu sid")
             if not save(rec):
@@ -179,15 +158,14 @@ class Handler(SimpleHTTPRequestHandler):
         u = urlparse(self.path)
         if u.path == API:
             q = parse_qs(u.query)
-            sid = norm_phone(q.get("sid", [""])[0])
-            email = norm_email(q.get("email", [""])[0])
+            sid = norm_email(q.get("email", [""])[0])
             act = q.get("action", [""])[0]
-            if not sid or "@" not in email:
+            if "@" not in sid:
                 out = {"status": "error"}
             elif act == "otp":
-                out = otp_send(sid, email)
+                out = otp_send(sid)
             elif act == "verify":
-                out = otp_verify(sid, email, "".join(c for c in q.get("code", [""])[0] if c.isdigit()))
+                out = otp_verify(sid, "".join(c for c in q.get("code", [""])[0] if c.isdigit()))
             else:
                 out = {"status": "error"}
             body = json.dumps(out, ensure_ascii=False).encode("utf-8")

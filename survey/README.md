@@ -5,16 +5,16 @@ Script ghi vào **Google Sheet** (mỗi khách một dòng) và **gửi email t�
 
 ## Khách vào làm và quay lại thế nào
 
-1. Màn hình đầu tiên yêu cầu khách nhập **số điện thoại** và **email**, rồi bấm "Gửi mã xác minh".
+1. Màn hình đầu tiên yêu cầu khách nhập **email**, rồi bấm "Gửi mã xác minh".
 2. Khách nhận email có **mã OTP 6 số** (hiệu lực 10 phút), nhập mã vào trang.
-3. Số điện thoại (đã chuẩn hóa: `+84 912…`, `84912…` và `0912…` là cùng một số) là mã khách (`sid`) trên mọi thiết bị.
-4. Khách quay lại, ở thiết bị nào cũng được, nhập lại **số điện thoại + email đã dùng lần đầu** và mã OTP mới thì phiếu làm dở được nạp lại, làm tiếp đúng bước cũ.
-5. Số đã có phiếu mà nhập email khác thì **không có mã nào được gửi**, nên không mở được và không ghi đè được. Trang vẫn hiện ô nhập mã để người lạ không biết số nào đã có phiếu.
-6. Mỗi số điện thoại chỉ có một dòng. Nút "Làm phiếu mới" xóa câu trả lời và ghi đè đúng dòng đó.
+3. Email (đã đưa về chữ thường) là mã khách (`sid`) trên mọi thiết bị. Số điện thoại chỉ là một câu bắt buộc trong phiếu, dùng để bạn gọi lại.
+4. Khách quay lại, ở thiết bị nào cũng được, nhập lại **email đã dùng lần đầu** và mã OTP mới thì phiếu làm dở được nạp lại, làm tiếp đúng bước cũ.
+5. Chỉ ai nhận được thư ở một email mới mở hoặc ghi được phiếu của email đó, nên không ai mở hay ghi đè được phiếu của người khác. Nhập email khác chỉ ra một phiếu mới.
+6. Mỗi email chỉ có một dòng. Nút "Làm phiếu mới" xóa câu trả lời và ghi đè đúng dòng đó.
 
-Giới hạn chống lạm dụng: mỗi số được gửi lại mã sau 60 giây, tối đa 5 mã mỗi giờ; nhập sai 5 lần thì mã bị hủy. Sau khi xác minh, phiên lưu dữ liệu có hiệu lực 24 giờ.
+Giới hạn chống lạm dụng: mỗi email được gửi lại mã sau 60 giây, tối đa 5 mã mỗi giờ; nhập sai 5 lần thì mã bị hủy. Sau khi xác minh, phiên lưu dữ liệu có hiệu lực 24 giờ.
 
-Cột `email_xac_minh` trong Sheet là email đã xác minh bằng OTP của số đó.
+Cột `sid` trong Sheet là email đã xác minh bằng OTP. Một người dùng hai email khác nhau sẽ có hai dòng, lọc theo cột `sdt` để gộp khi gọi.
 
 **Hạn mức email:** mỗi mã OTP và mỗi email thông báo tính vào hạn mức khoảng 100 email/ngày của tài khoản Gmail thường (khoảng 1.500 nếu dùng Google Workspace). Mỗi khách tốn ít nhất 2 email (mã + thông báo hoàn thành). Quá hạn mức thì khách không nhận được mã trong ngày đó.
 
@@ -26,7 +26,7 @@ Chi phí 0đ. Hạn mức gói miễn phí khoảng 100 email/ngày.
 1. Vào <https://sheets.new> để tạo Google Sheet mới (đặt tên tùy ý, ví dụ `Khảo sát khách hàng`).
 2. Chọn **Tiện ích mở rộng > Apps Script**.
 3. Xóa code mẫu, dán toàn bộ nội dung file [`khao-sat-apps-script.gs`](khao-sat-apps-script.gs), bấm **Lưu**.
-4. Nếu Sheet đã có dữ liệu thử từ phiên bản cũ, xóa sheet `KhaoSat` cũ để script tạo lại với cột `email_xac_minh` mới.
+4. Nếu Sheet đã có dữ liệu thử từ phiên bản cũ, xóa sheet `KhaoSat` cũ để script tạo lại với cấu trúc cột mới (`sid` là email, không còn cột `email_xac_minh`).
 5. (Tùy chọn) Sửa dòng `var NOTIFY_EMAIL = '...'` thành email muốn nhận thông báo.
    Để `''` nếu chỉ muốn lưu vào Sheet, không gửi mail.
 
@@ -57,8 +57,8 @@ var REMOTE_ENDPOINT = 'https://script.google.com/macros/s/XXXXXXXX/exec';
 Commit và push lên GitHub, GitHub Pages sẽ tự cập nhật sau ít phút.
 
 ### 4. Kiểm tra
-1. Mở trang khảo sát trên web, nhập số điện thoại và email thật của bạn, nhận mã OTP trong hộp thư (kể cả Spam), nhập mã rồi làm đến hết.
-   Mở lại trang bằng trình duyệt ẩn danh hoặc thiết bị khác, nhập lại đúng số và email, nhận mã mới để kiểm tra việc nạp lại phiếu.
+1. Mở trang khảo sát trên web, nhập email thật của bạn, nhận mã OTP trong hộp thư (kể cả Spam), nhập mã rồi làm đến hết.
+   Mở lại trang bằng trình duyệt ẩn danh hoặc thiết bị khác, nhập lại đúng email, nhận mã mới để kiểm tra việc nạp lại phiếu.
 2. Vào Google Sheet: sẽ có sheet `KhaoSat` với một dòng mới.
 3. Kiểm tra hộp thư (cả mục Spam): có email tóm tắt khi bấm **Xem gợi ý**.
 
@@ -77,8 +77,8 @@ Nếu chỉ bấm Lưu, bản đang chạy vẫn là code cũ. URL giữ nguyên
 | Sheet không có dữ liệu | Kiểm tra `REMOTE_ENDPOINT` đã dán đúng và đã push; kiểm tra quyền truy cập là **Bất kỳ ai** |
 | Có dữ liệu nhưng không có mail | Chưa cấp quyền gửi email (triển khai lại và cấp quyền); xem mục Spam; kiểm tra `NOTIFY_EMAIL` |
 | Sửa script mà không đổi gì | Chưa tạo **Phiên bản mới** khi triển khai |
-| Khách không nhận được mã OTP | Xem mục Spam; kiểm tra khách nhập đúng email lần đầu (xem cột `email_xac_minh` của số đó); có thể đã hết hạn mức email trong ngày |
-| Khách đổi email, không mở lại được phiếu cũ | Sửa ô `email_xac_minh` của số đó trong Sheet thành email mới |
+| Khách không nhận được mã OTP | Xem mục Spam; kiểm tra khách nhập đúng email (xem cột `sid`); có thể đã hết hạn mức email trong ngày |
+| Khách đổi email, không mở lại được phiếu cũ | Sửa ô `sid` của dòng đó trong Sheet thành email mới (chữ thường) |
 
 ## Chạy thử trên máy (không cần Google)
 ```bash

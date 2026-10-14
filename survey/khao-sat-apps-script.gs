@@ -1,8 +1,8 @@
 /**
  * Nhận câu trả lời khảo sát từ trang khao-sat-nhu-cau.html và ghi vào Google Sheet.
- * Mỗi khách một dòng, khóa là SỐ ĐIỆN THOẠI (cột sid), cập nhật liên tục khi khách trả lời tiếp.
- * Khách quay lại (kể cả thiết bị khác) nhập số điện thoại + email đã dùng lúc đầu, nhận MÃ OTP 6 số qua
- * email, nhập đúng mã thì được nạp lại phiếu làm dở. Không có mã đúng thì không đọc/ghi đè được dữ liệu.
+ * Mỗi khách một dòng, khóa là EMAIL đã xác minh (cột sid), cập nhật liên tục khi khách trả lời tiếp.
+ * Khách quay lại (kể cả thiết bị khác) nhập email đã dùng lúc đầu, nhận MÃ OTP 6 số qua email,
+ * nhập đúng mã thì được nạp lại phiếu làm dở. Không có mã đúng thì không đọc/ghi đè được dữ liệu.
  * Lần đầu cài, Google sẽ hỏi quyền gửi email (dùng cho OTP và thông báo), bấm cho phép.
  *
  * CÁCH CÀI (khoảng 5 phút):
@@ -27,13 +27,7 @@ var SHEET_NAME = 'KhaoSat';
 var NOTIFY_EMAIL = 'npmphu97@gmail.com';
 var COLS = ['sid', 'cap_nhat', 'trang_thai', 'buoc', 'ho_ten', 'cong_ty', 'sdt', 'email',
   'linh_vuc', 'muc_tieu', 'ngan_sach', 'goi_de_xuat', 'tong_thap', 'tong_cao',
-  'van_hanh', 'phan_loai', 'canh_bao', 'answers_json', 'email_xac_minh'];
-
-/** Chuẩn hóa số điện thoại: chỉ giữ chữ số, đổi +84/84 đầu thành 0. */
-function normPhone(s) {
-  var d = String(s || '').replace(/[^\d+]/g, '').replace(/^\+?84/, '0');
-  return d.replace(/\D/g, '').slice(0, 20);
-}
+  'van_hanh', 'phan_loai', 'canh_bao', 'answers_json'];
 
 function normEmail(s) {
   return String(s || '').trim().toLowerCase();
@@ -59,14 +53,9 @@ function findRow(sh, sid) {
   if (last < 2) return 0;
   var ids = sh.getRange(2, 1, last - 1, 1).getValues();
   for (var i = 0; i < ids.length; i++) {
-    if (normPhone(ids[i][0]) === sid) return i + 2;
+    if (normEmail(ids[i][0]) === sid) return i + 2;
   }
   return 0;
-}
-
-/** Email dùng để xác minh của một dòng (dòng cũ chưa có cột xác minh thì dùng cột email). */
-function expectedEmail(rowVals) {
-  return normEmail(rowVals[col('email_xac_minh')] || rowVals[col('email')]);
 }
 
 // ---- Xác minh OTP qua email ------------------------------------------------
@@ -90,12 +79,12 @@ function hmac(msg) {
   return Utilities.base64EncodeWebSafe(Utilities.computeHmacSha256Signature(msg, secret())).replace(/=+$/, '');
 }
 
-function makeToken(sid, email) {
-  var body = [sid, email, Date.now() + TOKEN_TTL_MS].join('|');
+function makeToken(sid) {
+  var body = [sid, Date.now() + TOKEN_TTL_MS].join('|');
   return Utilities.base64EncodeWebSafe(body) + '.' + hmac(body);
 }
 
-/** Trả về {sid, email} nếu token hợp lệ và chưa hết hạn, ngược lại null. */
+/** Trả về {sid} nếu token hợp lệ và chưa hết hạn, ngược lại null. */
 function parseToken(tok) {
   try {
     var parts = String(tok || '').split('.');
@@ -103,8 +92,8 @@ function parseToken(tok) {
     var body = Utilities.newBlob(Utilities.base64DecodeWebSafe(parts[0])).getDataAsString();
     if (hmac(body) !== parts[1]) return null;
     var f = body.split('|');
-    if (f.length !== 3 || Number(f[2]) < Date.now()) return null;
-    return { sid: f[0], email: f[1] };
+    if (f.length !== 2 || Number(f[1]) < Date.now()) return null;
+    return { sid: f[0] };
   } catch (err) {
     return null;
   }
@@ -120,16 +109,15 @@ function validEmail(s) {
 }
 
 /**
- * GET ?action=otp&sid=<sđt>&email=<email>          -> gửi mã 6 số tới email (nếu hợp lệ)
- * GET ?action=verify&sid&email&code=<mã>           -> kiểm tra mã, trả token + phiếu làm dở (nếu có)
- * Luôn trả "sent" dù email có khớp phiếu cũ hay không, để người lạ không dò được số nào đã có phiếu.
+ * GET ?action=otp&email=<email>              -> gửi mã 6 số tới email đó
+ * GET ?action=verify&email&code=<mã>         -> kiểm tra mã, trả token + phiếu làm dở (nếu có)
+ * Email chính là mã khách (sid): chỉ ai nhận được thư ở email đó mới mở/ghi được phiếu của email đó.
  */
 function doGet(e) {
   try {
     var p = (e && e.parameter) || {};
-    var sid = normPhone(p.sid);
-    var email = normEmail(p.email);
-    if (!sid || !validEmail(email)) return json({ status: 'error' });
+    var sid = normEmail(p.email);
+    if (!validEmail(sid)) return json({ status: 'error' });
     var cache = CacheService.getScriptCache();
 
     if (p.action === 'otp') {
@@ -139,20 +127,11 @@ function doGet(e) {
       cache.put('cd_' + sid, '1', OTP_COOLDOWN);
       cache.put('sc_' + sid, String(sends + 1), 3600);
 
-      var sh = getSheet();
-      var at = findRow(sh, sid);
-      var allowed = true;
-      if (at) {
-        var expected = expectedEmail(sh.getRange(at, 1, 1, COLS.length).getValues()[0]);
-        allowed = !!expected && expected === email;
-      }
-      if (allowed) {
-        var code = newCode();
-        cache.put('otp_' + sid, JSON.stringify({ h: hmac('otp|' + sid + '|' + email + '|' + code), e: email, t: 0 }), OTP_TTL);
-        MailApp.sendEmail(email, 'Mã xác minh khảo sát: ' + code,
-          'Mã xác minh của bạn là: ' + code + '\n\nMã có hiệu lực trong ' + (OTP_TTL / 60) +
-          ' phút. Nếu bạn không yêu cầu, hãy bỏ qua email này.', { name: 'Khảo sát nhu cầu' });
-      }
+      var code = newCode();
+      cache.put('otp_' + sid, JSON.stringify({ h: hmac('otp|' + sid + '|' + code), t: 0 }), OTP_TTL);
+      MailApp.sendEmail(sid, 'Mã xác minh khảo sát: ' + code,
+        'Mã xác minh của bạn là: ' + code + '\n\nMã có hiệu lực trong ' + (OTP_TTL / 60) +
+        ' phút. Nếu bạn không yêu cầu, hãy bỏ qua email này.', { name: 'Khảo sát nhu cầu' });
       return json({ status: 'sent' });
     }
 
@@ -160,15 +139,15 @@ function doGet(e) {
       var raw = cache.get('otp_' + sid);
       if (!raw) return json({ status: 'bad' });
       var o = JSON.parse(raw);
-      if (o.e !== email || o.t >= OTP_TRIES) { cache.remove('otp_' + sid); return json({ status: 'bad' }); }
+      if (o.t >= OTP_TRIES) { cache.remove('otp_' + sid); return json({ status: 'bad' }); }
       var code2 = String(p.code || '').replace(/\D/g, '');
-      if (hmac('otp|' + sid + '|' + email + '|' + code2) !== o.h) {
+      if (hmac('otp|' + sid + '|' + code2) !== o.h) {
         o.t++;
         cache.put('otp_' + sid, JSON.stringify(o), OTP_TTL);
         return json({ status: 'bad' });
       }
       cache.remove('otp_' + sid);
-      var token = makeToken(sid, email);
+      var token = makeToken(sid);
       var sh2 = getSheet();
       var at2 = findRow(sh2, sid);
       if (!at2) return json({ status: 'new', token: token });
@@ -193,11 +172,10 @@ function doPost(e) {
   lock.waitLock(15000);
   try {
     var rec = JSON.parse(e.postData.contents);
-    var sid = normPhone(rec.sid);
+    var sid = normEmail(rec.sid);
     if (!sid) return out('thieu sid');
     var tok = parseToken(rec.token);
     if (!tok || tok.sid !== sid) return out('chua xac minh');
-    var vem = tok.email;
 
     var sh = getSheet();
     var last = sh.getLastRow();
@@ -205,8 +183,6 @@ function doPost(e) {
     var wasDone = false;
     if (at) {
       var old = sh.getRange(at, 1, 1, COLS.length).getValues()[0];
-      var expected = expectedEmail(old);
-      if (!expected || expected !== vem) return out('sai xac minh');
       wasDone = String(old[col('trang_thai')]) === 'hoan_thanh';
     } else {
       at = last + 1;
@@ -215,14 +191,13 @@ function doPost(e) {
     var row = COLS.map(function (c) {
       if (c === 'sid') return sid;
       if (c === 'answers_json') return JSON.stringify(rec.answers || {});
-      if (c === 'email_xac_minh') return vem;
       var v = rec[c];
       if (Array.isArray(v)) v = v.join('; ');
       return v == null ? '' : v;
     });
 
     var rng = sh.getRange(at, 1, 1, COLS.length);
-    rng.setNumberFormat('@'); // giữ nguyên số 0 đầu của số điện thoại
+    rng.setNumberFormat('@'); // giữ nguyên số 0 đầu của số điện thoại (cột sdt)
     rng.setValues([row]);
     if (rec.trang_thai === 'hoan_thanh' && !wasDone) notify(rec);
     return out('ok');
