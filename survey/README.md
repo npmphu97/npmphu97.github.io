@@ -5,14 +5,18 @@ Script ghi vào **Google Sheet** (mỗi khách một dòng) và **gửi email t�
 
 ## Khách vào làm và quay lại thế nào
 
-1. Màn hình đầu tiên yêu cầu khách nhập **số điện thoại** và **email**.
-2. Số điện thoại (đã chuẩn hóa: `+84 912…`, `84912…` và `0912…` là cùng một số) là mã khách (`sid`) trên mọi thiết bị.
-3. Khách quay lại, ở thiết bị nào cũng được, nhập lại đúng **số điện thoại + email đã dùng lần đầu** thì phiếu làm dở được nạp lại và làm tiếp đúng bước cũ.
-4. Số đã có phiếu mà email không khớp thì không nạp được và không ghi đè được. Khách nhắn Zalo cho bạn để được hỗ trợ.
-5. Email dùng để xác minh được lưu ở cột `email_xac_minh`. Hệ thống **không gửi** email xác minh nào cho khách.
+1. Màn hình đầu tiên yêu cầu khách nhập **số điện thoại** và **email**, rồi bấm "Gửi mã xác minh".
+2. Khách nhận email có **mã OTP 6 số** (hiệu lực 10 phút), nhập mã vào trang.
+3. Số điện thoại (đã chuẩn hóa: `+84 912…`, `84912…` và `0912…` là cùng một số) là mã khách (`sid`) trên mọi thiết bị.
+4. Khách quay lại, ở thiết bị nào cũng được, nhập lại **số điện thoại + email đã dùng lần đầu** và mã OTP mới thì phiếu làm dở được nạp lại, làm tiếp đúng bước cũ.
+5. Số đã có phiếu mà nhập email khác thì **không có mã nào được gửi**, nên không mở được và không ghi đè được. Trang vẫn hiện ô nhập mã để người lạ không biết số nào đã có phiếu.
 6. Mỗi số điện thoại chỉ có một dòng. Nút "Làm phiếu mới" xóa câu trả lời và ghi đè đúng dòng đó.
 
-Lưu ý bảo mật: cách này ngăn người lạ chỉ biết số điện thoại mà xem hay ghi đè phiếu. Ai biết cả số điện thoại lẫn email của khách thì vẫn mở được phiếu. Nếu cần chặt hơn, dùng mã OTP gửi qua email.
+Giới hạn chống lạm dụng: mỗi số được gửi lại mã sau 60 giây, tối đa 5 mã mỗi giờ; nhập sai 5 lần thì mã bị hủy. Sau khi xác minh, phiên lưu dữ liệu có hiệu lực 24 giờ.
+
+Cột `email_xac_minh` trong Sheet là email đã xác minh bằng OTP của số đó.
+
+**Hạn mức email:** mỗi mã OTP và mỗi email thông báo tính vào hạn mức khoảng 100 email/ngày của tài khoản Gmail thường (khoảng 1.500 nếu dùng Google Workspace). Mỗi khách tốn ít nhất 2 email (mã + thông báo hoàn thành). Quá hạn mức thì khách không nhận được mã trong ngày đó.
 
 Chi phí 0đ. Hạn mức gói miễn phí khoảng 100 email/ngày.
 
@@ -32,7 +36,7 @@ Chi phí 0đ. Hạn mức gói miễn phí khoảng 100 email/ngày.
 3. Cấu hình:
    - **Thực thi dưới tên:** Tôi
    - **Người có quyền truy cập:** Bất kỳ ai
-4. Bấm **Triển khai**, rồi **Cấp quyền truy cập** (cho phép truy cập Sheet và gửi email).
+4. Bấm **Triển khai**, rồi **Cấp quyền truy cập** (cho phép truy cập Sheet và gửi email, dùng để gửi mã OTP và thông báo).
    Nếu Google báo "ứng dụng chưa được xác minh": chọn **Nâng cao > Đi tới ... (không an toàn)**.
    Đây là script do chính bạn viết nên có thể cho phép.
 5. Sao chép **URL ứng dụng web** (dạng `https://script.google.com/macros/s/.../exec`).
@@ -53,8 +57,8 @@ var REMOTE_ENDPOINT = 'https://script.google.com/macros/s/XXXXXXXX/exec';
 Commit và push lên GitHub, GitHub Pages sẽ tự cập nhật sau ít phút.
 
 ### 4. Kiểm tra
-1. Mở trang khảo sát trên web, nhập số điện thoại và email ở màn hình đầu, rồi làm đến hết.
-   Mở lại trang bằng trình duyệt ẩn danh hoặc thiết bị khác, nhập lại đúng số và email để kiểm tra việc nạp lại phiếu.
+1. Mở trang khảo sát trên web, nhập số điện thoại và email thật của bạn, nhận mã OTP trong hộp thư (kể cả Spam), nhập mã rồi làm đến hết.
+   Mở lại trang bằng trình duyệt ẩn danh hoặc thiết bị khác, nhập lại đúng số và email, nhận mã mới để kiểm tra việc nạp lại phiếu.
 2. Vào Google Sheet: sẽ có sheet `KhaoSat` với một dòng mới.
 3. Kiểm tra hộp thư (cả mục Spam): có email tóm tắt khi bấm **Xem gợi ý**.
 
@@ -73,13 +77,14 @@ Nếu chỉ bấm Lưu, bản đang chạy vẫn là code cũ. URL giữ nguyên
 | Sheet không có dữ liệu | Kiểm tra `REMOTE_ENDPOINT` đã dán đúng và đã push; kiểm tra quyền truy cập là **Bất kỳ ai** |
 | Có dữ liệu nhưng không có mail | Chưa cấp quyền gửi email (triển khai lại và cấp quyền); xem mục Spam; kiểm tra `NOTIFY_EMAIL` |
 | Sửa script mà không đổi gì | Chưa tạo **Phiên bản mới** khi triển khai |
-| Khách báo không mở lại được phiếu | Email nhập khác với email lần đầu: xem cột `email_xac_minh` của số đó trong Sheet |
+| Khách không nhận được mã OTP | Xem mục Spam; kiểm tra khách nhập đúng email lần đầu (xem cột `email_xac_minh` của số đó); có thể đã hết hạn mức email trong ngày |
+| Khách đổi email, không mở lại được phiếu cũ | Sửa ô `email_xac_minh` của số đó trong Sheet thành email mới |
 
 ## Chạy thử trên máy (không cần Google)
 ```bash
 python survey/khao_sat_server.py
 ```
-Mở <http://localhost:8000/khao-sat-nhu-cau.html>. Kết quả lưu vào `survey/khao-sat-data/responses.json` và `responses.csv`.
+Mở <http://localhost:8000/khao-sat-nhu-cau.html>. Chạy cục bộ không gửi email thật: mã OTP được in ra cửa sổ đang chạy server (dòng bắt đầu bằng `[OTP]`). Kết quả lưu vào `survey/khao-sat-data/responses.json` và `responses.csv`.
 
 ## Quyền riêng tư
 Khi đã cấu hình `REMOTE_ENDPOINT`, trang tự hiển thị thông báo quyền riêng tư cho khách.

@@ -12,7 +12,9 @@ import csv
 import json
 import os
 import sys
+import secrets
 import threading
+import time
 from urllib.parse import parse_qs, urlparse
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
@@ -25,6 +27,9 @@ COLS = ["sid", "cap_nhat", "trang_thai", "buoc", "ho_ten", "cong_ty", "sdt", "em
         "linh_vuc", "muc_tieu", "ngan_sach", "goi_de_xuat", "tong_thap", "tong_cao",
         "van_hanh", "phan_loai", "canh_bao", "answers_json", "email_xac_minh"]
 lock = threading.Lock()
+# OTP và phiên chỉ giữ trong bộ nhớ. Chạy cục bộ không gửi mail: mã in ra cửa sổ chạy server.
+OTP = {}     # sid -> {"code", "email", "exp", "tries"}
+TOKENS = {}  # token -> {"sid", "email", "exp"}
 
 
 def load():
@@ -79,12 +84,14 @@ def save(rec):
     with lock:
         os.makedirs(DATA, exist_ok=True)
         rows = load()
-        vem = norm_email(rec.pop("vemail", ""))
-        i = find(rows, rec["sid"])
-        expected = expected_email(rows[i]) if i >= 0 else ""
-        if (expected and expected != vem) or (not expected and not vem):
+        tok = TOKENS.get(str(rec.pop("token", "")))
+        if not tok or tok["exp"] < time.time() or tok["sid"] != rec["sid"]:
             return False
-        rec["email_xac_minh"] = expected or vem
+        vem = tok["email"]
+        i = find(rows, rec["sid"])
+        if i >= 0 and expected_email(rows[i]) != vem:
+            return False
+        rec["email_xac_minh"] = vem
         if i >= 0:
             rows[i] = rec
         else:
@@ -107,18 +114,37 @@ def save(rec):
         return True
 
 
-def lookup(sid, email):
+def otp_send(sid, email):
     with lock:
+        rows = load()
+        i = find(rows, sid)
+        if i >= 0 and expected_email(rows[i]) != email:
+            return {"status": "sent"}  # không tiết lộ số đã có phiếu
+        code = "%06d" % secrets.randbelow(1000000)
+        OTP[sid] = {"code": code, "email": email, "exp": time.time() + 600, "tries": 0}
+    sys.stderr.write("[OTP] %s -> %s : %s\n" % (sid, email, code))
+    return {"status": "sent"}
+
+
+def otp_verify(sid, email, code):
+    with lock:
+        o = OTP.get(sid)
+        if not o or o["exp"] < time.time() or o["email"] != email or o["tries"] >= 5:
+            OTP.pop(sid, None)
+            return {"status": "bad"}
+        if o["code"] != code:
+            o["tries"] += 1
+            return {"status": "bad"}
+        OTP.pop(sid, None)
+        tok = secrets.token_hex(16)
+        TOKENS[tok] = {"sid": sid, "email": email, "exp": time.time() + 24 * 3600}
         rows = load()
     i = find(rows, sid)
     if i < 0:
-        return {"status": "new"}
+        return {"status": "new", "token": tok}
     r = rows[i]
-    exp = expected_email(r)
-    if not email or not exp or email != exp:
-        return {"status": "mismatch"}
-    return {"status": "ok", "trang_thai": r.get("trang_thai", ""), "buoc": r.get("buoc", ""),
-            "answers": r.get("answers", {})}
+    return {"status": "ok", "token": tok, "trang_thai": r.get("trang_thai", ""),
+            "buoc": r.get("buoc", ""), "answers": r.get("answers", {})}
 
 
 class Handler(SimpleHTTPRequestHandler):
@@ -153,7 +179,17 @@ class Handler(SimpleHTTPRequestHandler):
         u = urlparse(self.path)
         if u.path == API:
             q = parse_qs(u.query)
-            out = lookup(norm_phone(q.get("sid", [""])[0]), norm_email(q.get("email", [""])[0]))
+            sid = norm_phone(q.get("sid", [""])[0])
+            email = norm_email(q.get("email", [""])[0])
+            act = q.get("action", [""])[0]
+            if not sid or "@" not in email:
+                out = {"status": "error"}
+            elif act == "otp":
+                out = otp_send(sid, email)
+            elif act == "verify":
+                out = otp_verify(sid, email, "".join(c for c in q.get("code", [""])[0] if c.isdigit()))
+            else:
+                out = {"status": "error"}
             body = json.dumps(out, ensure_ascii=False).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json; charset=utf-8")
