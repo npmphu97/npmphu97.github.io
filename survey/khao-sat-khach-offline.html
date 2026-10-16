@@ -146,7 +146,7 @@ footer{color:var(--muted);font-size:.82rem;padding:1.5rem 0 2rem;border-top:1px 
 <body>
 <header class="top">
   <div class="wrap">
-    <a class="brand" href="index.html"><i>PNP</i><span>Nguyễn Phan Minh Phú<small>Website · App · Hệ thống</small></span></a>
+    <div class="brand"><i>PNP</i><span>Nguyễn Phan Minh Phú<small>Website · App · Hệ thống</small></span></div>
     <button id="theme" type="button" aria-label="Đổi giao diện sáng/tối">◐</button>
   </div>
   <div class="bar"><b id="bar"></b></div>
@@ -169,7 +169,6 @@ footer{color:var(--muted);font-size:.82rem;padding:1.5rem 0 2rem;border-top:1px 
 <script>
 (function(){
 var CONTACT = {email:'npmphu97@gmail.com', zalo:'0379774886'};
-var ENDPOINT = '';
 
 var PKG = {
   web:[
@@ -326,7 +325,7 @@ var STEPS = [
   {id:'ho_ten',type:'text',label:'Họ và tên',req:true},
   {id:'cong_ty',type:'text',label:'Tên doanh nghiệp / thương hiệu',req:true},
   {id:'sdt',type:'tel',label:'Số điện thoại / Zalo',req:true},
-  {id:'email',type:'email',label:'Email (đã xác minh)'},
+  {id:'email',type:'email',label:'Email'},
   {id:'vai_tro',type:'radio',label:'Vai trò của bạn trong dự án',req:true,opts:[
     ['chu','Chủ doanh nghiệp / người quyết định'],['quanly','Quản lý được giao phụ trách'],['tim_hieu','Nhân viên, đang tìm hiểu giúp']]},
   {id:'linh_vuc',type:'radio',label:'Lĩnh vực kinh doanh',req:true,opts:[
@@ -414,36 +413,7 @@ var STEPS = [
 var KEY='khaosat_nhucau_v1', ans={}, cur=0, done=false;
 var internal=false;
 try{var saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved&&saved.ans){ans=saved.ans;cur=saved.cur||0;}}catch(e){}
-function save(){try{localStorage.setItem(KEY,JSON.stringify({ans:ans,cur:cur}))}catch(e){}schedulePush()}
-
-function newSid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
-var sid=(function(){try{var x=localStorage.getItem(KEY+'_sid');if(!x){x=newSid();localStorage.setItem(KEY+'_sid',x)}return x}catch(e){return newSid()}})();
-var pushTimer=null;
-var unlocked=!ENDPOINT, token='', gEmail='', gTimer=null;
-function record(status){
-  var vs=visibleSteps(), rec={sid:sid,token:token,cap_nhat:new Date().toISOString(),trang_thai:status,
-    buoc:(done?vs.length:cur+1)+'/'+vs.length,ho_ten:ans.ho_ten||'',cong_ty:ans.cong_ty||'',sdt:ans.sdt||'',email:ans.email||'',
-    linh_vuc:ans.linh_vuc?labelOf('linh_vuc',ans.linh_vuc,ans):'',
-    muc_tieu:(ans.muc_tieu||[]).map(function(x){return labelOf('muc_tieu',x,ans)}),
-    ngan_sach:ans.ngan_sach?labelOf('ngan_sach',ans.ngan_sach):'',answers:ans};
-  if(status==='hoan_thanh'){try{
-    var r=analyze(ans);
-    rec.goi_de_xuat=r.items.map(function(i){return i.name}).concat(r.addons.map(function(x){return x.name}));
-    rec.tom_tat=summary(ans,r);
-  }catch(e){}}
-  return rec;
-}
-function push(status){
-  clearTimeout(pushTimer);
-  if(!ENDPOINT||!unlocked||!(ans.ho_ten||ans.email))return;
-  try{fetch(ENDPOINT,{method:'POST',mode:ENDPOINT.charAt(0)==='/'?'same-origin':'no-cors',keepalive:true,
-    headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(record(status))}).catch(function(){})}catch(e){}
-}
-function schedulePush(){
-  if(!ENDPOINT||!unlocked)return;
-  clearTimeout(pushTimer);
-  pushTimer=setTimeout(function(){push(done?'hoan_thanh':'dang_dien')},1500);
-}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({ans:ans,cur:cur}))}catch(e){}}
 
 function visibleSteps(){return STEPS.filter(function(s){return !s.show||s.show(ans)})}
 function visibleQs(s){return s.qs.filter(function(q){return !q.show||q.show(ans)})}
@@ -475,7 +445,7 @@ function renderQ(q){
   }else{
     h+='<label class="t" for="f_'+q.id+'">'+lab+'</label>'+(hh?'<span class="h">'+esc(hh)+'</span>':'');
     if(q.type==='textarea')h+='<textarea id="f_'+q.id+'" name="'+q.id+'">'+esc(v||'')+'</textarea>';
-    else h+='<input id="f_'+q.id+'" name="'+q.id+'" type="'+q.type+'" value="'+esc(v||'')+'"'+(q.type==='tel'?' inputmode="tel"':'')+(q.id==='email'&&ENDPOINT?' readonly':'')+'>';
+    else h+='<input id="f_'+q.id+'" name="'+q.id+'" type="'+q.type+'" value="'+esc(v||'')+'"'+(q.type==='tel'?' inputmode="tel"':'')+'>';
   }
   return h+'<div class="err">Vui lòng trả lời câu này.</div></div>';
 }
@@ -522,7 +492,6 @@ function validStep(){
   return ok;
 }
 $('form').addEventListener('change',function(e){
-  if(!unlocked)return;
   [].forEach.call($('form').querySelectorAll('.opt'),function(l){var i=l.querySelector('input');l.classList.toggle('on',!!(i&&i.checked))});
   readStep();save();
   var s=visibleSteps()[cur], n=visibleQs(s).length, shown=$('form').querySelectorAll('.q').length;
@@ -530,93 +499,18 @@ $('form').addEventListener('change',function(e){
 });
 $('form').addEventListener('submit',function(e){
   e.preventDefault();
-  if(!unlocked){unlock();return;}
   readStep();
   if(!validStep())return;
   save();
   if(cur<visibleSteps().length-1){cur++;save();go();}else{done=true;go();}
 });
 $('steps').addEventListener('click',function(e){
-  if(!unlocked)return;
   var li=e.target.closest('li');if(!li)return;
   if(li.dataset.i==='res')return;
   var i=+li.dataset.i; if(i<=cur||done){if(!done)readStep();done=false;cur=i;save();go();}
 });
-function stopTimer(){if(gTimer){clearInterval(gTimer);gTimer=null}}
-function gateShell(inner,msg){
-  stopTimer();
-  $('steps').innerHTML='';$('bar').style.width='0';$('result').innerHTML='';
-  $('form').style.display='';
-  $('form').innerHTML='<div class="card"><p class="mono">Bắt đầu</p>'+inner+
-    '<div class="err" id="g_msg" style="'+(msg?'display:block':'')+'">'+esc(msg||'')+'</div></div>';
-}
-function renderGate(msg){
-  gateShell('<h2>Nhập thông tin để bắt đầu</h2>'+
-    '<p class="sub">Email dùng để lưu phiếu và mở lại trên mọi thiết bị. Mình sẽ gửi một mã xác minh 6 số tới email này.</p>'+
-    '<div class="q" id="g_eq"><label class="t" for="g_email">Email <span class="req">*</span></label>'+
-    '<span class="h">Quay lại làm tiếp thì dùng đúng email này.</span>'+
-    '<input id="g_email" type="email" autocomplete="email" value="'+esc(gEmail||ans.email||'')+'"><div class="err">Email chưa hợp lệ.</div></div>',msg);
-  $('form').insertAdjacentHTML('beforeend','<div class="nav"><span></span><button type="submit" class="btn" id="g_go">Gửi mã xác minh →</button></div>');
-}
-function renderCode(msg){
-  gateShell('<h2>Nhập mã xác minh</h2>'+
-    '<p class="sub">Mình đã gửi mã 6 số tới <b>'+esc(gEmail)+'</b>. Mã có hiệu lực 10 phút. Không thấy thì kiểm tra cả mục Spam.</p>'+
-    '<div class="q" id="g_cq"><label class="t" for="g_code">Mã xác minh <span class="req">*</span></label>'+
-    '<input id="g_code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" value=""><div class="err">Nhập mã gồm 6 chữ số.</div></div>',msg);
-  $('form').insertAdjacentHTML('beforeend','<div class="nav"><button type="button" class="btn ghost" id="g_back">← Đổi số/email</button>'+
-    '<button type="submit" class="btn" id="g_go">Xác nhận →</button></div>'+
-    '<p class="note"><button type="button" class="btn ghost" id="g_resend" disabled>Gửi lại mã</button></p>');
-  $('g_back').onclick=function(){renderGate()};
-  var left=60,rs=$('g_resend');
-  function tick(){if(left>0){rs.disabled=true;rs.textContent='Gửi lại mã ('+left+'s)';left--}else{rs.disabled=false;rs.textContent='Gửi lại mã';stopTimer()}}
-  tick();gTimer=setInterval(tick,1000);
-  rs.onclick=function(){sendOtp(true)};
-  $('g_code').focus();
-}
-function api(params){
-  var q=Object.keys(params).map(function(k){return k+'='+encodeURIComponent(params[k])}).join('&');
-  return fetch(ENDPOINT+(ENDPOINT.indexOf('?')<0?'?':'&')+q).then(function(r){return r.json()});
-}
-function busy(on,label){var b=$('g_go');if(b){b.disabled=on;if(label)b.textContent=label}}
-function sendOtp(resend){
-  if(!resend){
-    var email=$('g_email').value.trim().toLowerCase();
-    var okE=/^[^@\s|]+@[^@\s|]+\.[^@\s|]+$/.test(email);
-    $('g_eq').classList.toggle('bad',!okE);
-    if(!okE)return;
-    gEmail=email;
-  }
-  busy(true,'Đang gửi mã...');
-  api({action:'otp',email:gEmail}).then(function(r){
-    if(r.status==='sent')return renderCode();
-    if(r.status==='wait')return renderCode('Mã vừa được gửi cách đây chưa lâu. Hãy dùng mã trong email, hoặc đợi khoảng 1 phút rồi gửi lại.');
-    if(r.status==='limit')return renderGate('Bạn đã xin mã quá nhiều lần. Vui lòng thử lại sau 1 giờ hoặc nhắn Zalo '+CONTACT.zalo+'.');
-    renderGate('Chưa gửi được mã, vui lòng kiểm tra email và thử lại.');
-  }).catch(function(){renderGate('Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.')});
-}
-function verifyCode(){
-  var code=$('g_code').value.replace(/\D/g,'');
-  $('g_cq').classList.toggle('bad',code.length!==6);
-  if(code.length!==6)return;
-  busy(true,'Đang kiểm tra...');
-  api({action:'verify',email:gEmail,code:code}).then(function(r){
-    if(r.status==='bad')return renderCode('Mã không đúng hoặc đã hết hạn. Hãy kiểm tra lại hoặc bấm "Gửi lại mã".');
-    if(r.status!=='ok'&&r.status!=='new')return renderCode('Chưa kiểm tra được, vui lòng thử lại.');
-    var sameLocal=String(ans.email||'').trim().toLowerCase()===gEmail;
-    if(r.status==='ok'){
-      ans=r.answers||{};var m=/^(\d+)\//.exec(r.buoc||'');
-      cur=m?Math.max(0,+m[1]-1):0;done=r.trang_thai==='hoan_thanh';
-    }else if(!sameLocal){ans={};cur=0;done=false;}
-    ans.email=gEmail;
-    sid=gEmail;token=r.token;unlocked=true;stopTimer();
-    try{localStorage.setItem(KEY+'_sid',sid)}catch(e){}
-    save();go();
-  }).catch(function(){renderCode('Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.')});
-}
-function unlock(){if($('g_code'))verifyCode();else sendOtp(false)}
 function go(){
-  if(!unlocked){renderGate();return;}
-  if(done){$('form').style.display='none';renderSteps();renderResult();push('hoan_thanh');}
+  if(done){$('form').style.display='none';renderSteps();renderResult();}
   else renderForm();
   scrollTo({top:0,behavior:'smooth'});
 }
@@ -651,18 +545,12 @@ function analyze(a){
     if(lv<3&&fn.indexOf('thanh_toan')>=0)addon('thanhtoan');
     if(has(a,'muc_tieu','shop')||fn.indexOf('gio_hang')>=0){
       addon('giohang');backend=true;weeks[weeks.length-1]+=2;
-      if(a.so_san_pham==='500+');
     }
     if(fn.indexOf('popup')>=0)addon('popup');
     if(fn.indexOf('leadform')>=0)addon('leadform');
     if(fn.indexOf('chat')>=0&&lv<3)addon('chat');
     if(fn.indexOf('tintuc')>=0&&lv<2){addon('tintuc','gói dưới Nâng cao chưa có CMS');var cw=Math.max(w.weeks,4);items[items.length-1].weeks=cw;items[items.length-1].wmax=Math.max(w.wmax||0,6);weeks[weeks.length-1]=cw;}
     if(fn.indexOf('day_crm')>=0&&!wantsSys(a))addon('tichhopcrm');
-    if(a.nhan_dien==='chua');
-    if(a.noi_dung==='chua');
-    if(fn.indexOf('thanh_toan')>=0);
-    if(fn.indexOf('dat_lich')>=0);
-    if(a.so_trang==='chua_ro');
   }
 
   if(wantsSys(a)||(unknownOnly&&a.nguoi_dung==='noi_bo')){
@@ -684,10 +572,6 @@ function analyze(a){
     items.push({type:'sys',name:base.name,inc:base.inc,why:fwhy,weeks:Math.ceil(base.weeks*Math.max(f,0.8))});
     weeks.push(Math.ceil(base.weeks*Math.max(f,0.8))); backend=true;
     (a.tich_hop||[]).forEach(function(k){if(PKG.addon[k])addon(k);});
-    if(a.du_lieu==='nhieu'){;;}
-    if(a.nen_tang==='app'){;}
-    if(has(a,'tich_hop','ketoan'));
-    if(nv.length);
   }
 
   if(wantsMini(a)){
@@ -696,21 +580,18 @@ function analyze(a){
     var m=adv?PKG.mini.adv:PKG.mini.basic;
     items.push({type:'mini',name:m.name,inc:m.inc,why:adv?['có bán hàng / tích điểm / thanh toán / ZNS']:['giới thiệu, đặt lịch, điểm danh'],weeks:m.weeks});
     weeks.push(m.weeks); if(adv)backend=true;
-    if(a.zalo_oa!=='co');
-    if(a.mini_kh==='5000+');
   }
 
   if(!items.length){
     var w0=PKG.web[1];items.push({type:'web',name:w0.name,inc:w0.inc,why:['khách chưa rõ nhu cầu, lấy gói phổ biến làm mốc'],weeks:w0.weeks});weeks.push(w0.weeks);
   }
-  if(unknownOnly);
 
   var rush=false;
   weeks.sort(function(x,y){return y-x});
   var wk=weeks.length?weeks[0]+Math.ceil(weeks.slice(1).reduce(function(s,x){return s+x},0)*0.3):2;
   var wkHi=Math.ceil(wk*1.5);
   var dl=DEADLINE_WEEKS[a.thoi_gian]||99;
-  if(dl<wk){rush=true;;}
+  if(dl<wk)rush=true;
 
   return {items:items,addons:addons,weeks:wk,weeksHi:wkHi,rush:rush};
 }
@@ -787,7 +668,7 @@ function renderResult(a0){
     $('gmail').onclick=function(){try{copy(txt,true)}catch(e){}};
     $('copy').onclick=function(){copy(txt)};
     $('edit').onclick=function(){done=false;cur=0;go()};
-    $('reset').onclick=function(){if(!confirm('Xóa toàn bộ câu trả lời để làm phiếu mới? (Phiếu cũ của email này sẽ bị thay thế)'))return;var keepE=ans.email;ans={};cur=0;done=false;try{localStorage.removeItem(KEY)}catch(e){}if(ENDPOINT){ans.email=keepE;}else{try{localStorage.removeItem(KEY+'_sid')}catch(e){}sid=newSid();try{localStorage.setItem(KEY+'_sid',sid)}catch(e){}}save();go()};
+    $('reset').onclick=function(){if(!confirm('Xóa toàn bộ câu trả lời để làm phiếu mới?'))return;ans={};cur=0;done=false;try{localStorage.removeItem(KEY)}catch(e){}save();go()};
   }
 }
 
